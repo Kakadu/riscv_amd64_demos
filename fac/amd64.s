@@ -38,7 +38,7 @@ main:
   mov  edi, eax
   call print_int
   pop rbp
-  ret  ;;;; main
+  ret
 
 ; Silence linker's warning about executable stack
 section .note.GNU-stack noalloc noexec nowrite progbits
