@@ -1,0 +1,35 @@
+(rule
+ (targets rv64.exe)
+ (deps
+  (:src rv64.s)
+  (:runtime rv64_runtime.s))
+ (mode
+  (promote (until-clean)))
+ (action
+  (progn
+   (run riscv64-linux-gnu-gcc -march=rv64gc %{runtime} -c -o runtime.o)
+   (run riscv64-linux-gnu-as -march=rv64gc %{src} -o rv64.o)
+   (run riscv64-linux-gnu-gcc runtime.o rv64.o -o %{targets}))))
+
+(cram
+ (deps rv64.exe amd64.exe))
+
+(rule
+ (targets amd64_runtime.o)
+ (deps
+  (:src amd64_runtime.s))
+ (action
+  (progn
+   (run nasm -g -F dwarf -felf64 %{src} -o %{targets}))))
+
+(rule
+ (targets amd64.exe)
+ (deps
+  (:srcasm amd64.s)
+  (:runtime amd64_runtime.o))
+ (mode
+  (promote (until-clean)))
+ (action
+  (progn
+   (run nasm -g -F dwarf -felf64 %{srcasm} -o fac.o)
+   (run gcc-12 -g %{runtime} fac.o -o %{targets}))))
