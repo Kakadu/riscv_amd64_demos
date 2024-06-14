@@ -16,7 +16,7 @@ _start:
   li  a7, 93 # Service command code 93 terminates
   ecall      # Call linux to terminate the program
 
-fac:
+fac: # a0 is argument and return value
   mv      a5, a0
   li      a0, 1
   li      a3, 1
