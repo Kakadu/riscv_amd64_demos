@@ -1,6 +1,7 @@
 # https://github.com/riscv/riscv-v-spec/blob/master/v-spec.adoc
 .section .data
 str2:    .string "01234567012345670123456701234567\n" # 32+1 bytes
+#str2:    .string "01234567\n" # 32+1 bytes
 NOT_IMPLEMENTED_STR: .string "Not implemented\n\0"
 .equ BUFSIZE,32
 .globl str2
@@ -58,12 +59,11 @@ memcpy_fin:
 .global myitoa
 myitoa:
   # t2 is an arg, a0 is current pos, a1 is output len
-  #li t5, 0x30   #  char for an '0'
   li t1, 10     # t1 is basis
   mv t2, a0     # argument
   mv a1, zero   # output length
   la a0, str2
-  addi a0, a0, 32  # 32 is preallocated space
+  addi a0, a0, BUFSIZE  # 32 is preallocated space
 myitoa_loop:
   #
   remu t4, t2, t1

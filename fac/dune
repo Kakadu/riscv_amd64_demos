@@ -9,7 +9,7 @@
   (progn
    (run riscv64-linux-gnu-gcc -march=rv64gc %{runtime} -c -o runtime.o)
    (run riscv64-linux-gnu-as -march=rv64gc %{src} -o rv64.o)
-   (run riscv64-linux-gnu-gcc runtime.o rv64.o -o %{targets}))))
+   (run riscv64-linux-gnu-ld runtime.o rv64.o -o %{targets}))))
 
 (cram
  (deps rv64.exe amd64.exe))
@@ -32,4 +32,6 @@
  (action
   (progn
    (run nasm -g -F dwarf -felf64 %{srcasm} -o fac.o)
-   (run gcc-12 -g %{runtime} fac.o -o %{targets}))))
+   (run ld -g %{runtime} fac.o -o %{targets})
+   ;(run gcc-12 -g %{runtime} fac.o -o %{targets})
+   )))

@@ -1,12 +1,14 @@
 section .text
 extern print_int
 
+GLOBAL _start
 _start:
   push    rbp
   mov     rbp, rsp   ; prologue
   call main
-  mov rdi, rax    ; rdi stores return code
-  mov rax, 60     ; exit syscall
+  mov rdi, 0  ; rdi stores return code
+  ;mov rax, 60 ; exit syscall
+  mov rax, 231 ; exit_group syscall
   syscall
 
 ; copy-paste from Godbolt (-O0)
@@ -31,13 +33,10 @@ fac:
 
 GLOBAL main
 main:
-  push rbp
-  mov  rbp, rsp
-  mov rdi, 4
+  mov rdi, 5
   call fac
-  mov  edi, eax
+  mov  rdi, rax
   call print_int
-  pop rbp
   ret
 
 ; Silence linker's warning about executable stack

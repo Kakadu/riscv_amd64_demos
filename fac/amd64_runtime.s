@@ -1,3 +1,4 @@
+; https://cs.brown.edu/courses/cs033/docs/guides/x64_cheatsheet.pdf
 section .data
 str2 db  "01234567012345670123456701234567", 0xA
 BUFSIZE equ 32
@@ -32,8 +33,8 @@ myitoa: ; rdi is argument
     div  r10  ; rax quotient, rdx reminder
     mov r11, rax
     add rdx, 0x30
-    mov [r8], dil
     dec r8
+    mov byte [r8], dl
     cmp r11, 0
     jne .myitoa_loop
     ret
@@ -42,7 +43,7 @@ GLOBAL print_int
 print_int:
     push rdi
     mov rdi, str2
-    mov rsi, 0x30
+    mov rsi, 0x20 ; space
     mov rdx, BUFSIZE
     call memset
     ; myitoa
