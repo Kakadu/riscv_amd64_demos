@@ -1,18 +1,15 @@
-#define _GNU_SOURCE
+//#define _GNU_SOURCE
+//#include <sys/types.h>
 #include <unistd.h>
 #include <sys/syscall.h>
-#include <sys/types.h>
 #include <stdio.h>
 
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
-int
-main(int argc, char *argv[])
-{
-    size_t         ret;
-    char  buffer[4];
+int main(int argc, char *argv[]) {
+    char  buffer[12];
     FILE* fp = fopen("test.txt", "r");
-    ret = fread(buffer, sizeof(*buffer), ARRAY_SIZE(buffer), fp);
-    printf("%s", buffer);
+    size_t ret = fread(buffer, sizeof(*buffer), ARRAY_SIZE(buffer), fp);
+    printf("%s\n", buffer);
     return 0;
 }
