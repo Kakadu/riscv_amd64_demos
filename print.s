@@ -1,9 +1,10 @@
 # https://github.com/riscv/riscv-v-spec/blob/master/v-spec.adoc
 .section .data
-helloworld: .string "Hello_World!\n\0"
-varname:    .string "varname\n"
 str2:       .string "01234567012345670123456701234567\n" # 32+1 bytes
+helloworld: .string "Hello, World!\n"
+varname:    .string "varname\n"
 .equ BUFSIZE,32
+#.equ BUFSIZE,32+1 # created extra zero character in the end of str2. Maybe padding?
 .text
 
 .global memset
@@ -65,10 +66,10 @@ myitoa_loop:
 
 .global _start
 _start:
-    .option push
-    .option norelax
+.option push
+.option norelax
     la gp, __global_pointer$
-    .option pop
+.option pop
     li      a7, 64  # write on RISCV linux
     li      a0, 1   # stdout
     la      a1, helloworld
@@ -78,7 +79,7 @@ _start:
     li      a7, 64  # write on RISCV linux
     li      a0, 1
     la      a1, str2
-    #li      a2, 10 #
+    li      a2, 10 #
     li      a2, BUFSIZE+1
     ecall
 
@@ -98,7 +99,7 @@ _start:
     li      a7, 64  # write on RISCV linux
     li      a0, 1
     la      a1, str2
-    li      a2, BUFSIZE+1
+    li      a2, BUFSIZE
     ecall
 
     li      a7, 93  # Service command code 93 terminates

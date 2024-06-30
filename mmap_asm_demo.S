@@ -1,5 +1,9 @@
 # https://github.com/riscv/riscv-v-spec/blob/master/v-spec.adoc
 # https://jborza.com/post/2021-05-11-riscv-linux-syscalls
+.section .data
+HELLO_WORLD: .asciz "Hello, World!"
+.equ BUFSIZE, 12
+
 .text
 .balign 4
 
@@ -35,21 +39,21 @@ myitoa_loop:
 
 .global _start
 _start:
-    .option push
-    .option norelax
+.option push
+.option norelax
     la gp, __global_pointer$
-    .option pop
+.option pop
     li      a7, 64  # write on RISCV linux
     li      a0, 1
-    la      a1, helloworld
-    li      a2, 13
+    la      a1, HELLO_WORLD
+    li      a2, 7
     ecall
 
     li a7, 222  # mmap
     li a0, 0    # destination hint
     li a1, 64
-    li a2, 3 # PROT_READ | PROT_WRITE
-    li a3, 33 #  MAP_SHARED | MAP_ANONYMOUS
+    li a2, 0x3 # PROT_READ | PROT_WRITE
+    li a3, 0x21 #  MAP_SHARED | MAP_ANONYMOUS
     li a4, -1
     li a5, 0
     ecall
@@ -107,5 +111,3 @@ main_map_failed:
     li      a0, 13  # Use 0 return code
     ecall           # Call linux to terminate the program
 
-.data
-helloworld:      .ascii "Hello World!\n\0"
