@@ -34,7 +34,8 @@ _start:
   # call print_int
 
   la a0, demostring1
-  call rv64_fuck
+  li a1, 11
+  call rv64_only_digits
   #call strlenV
   call print_int
 
@@ -42,4 +43,5 @@ _start:
   #addi    a7, x0, 93  # Service command code 93 terminates
   li  a7, 93 # Service command code 93 terminates
   ecall      # Call linux to terminate the program
+
 

@@ -38,37 +38,40 @@
    (run riscv64-linux-gnu-ld %{runtime} %{lib} rv64.o -o %{targets}))))
 
 (cram
- (deps rv64.exe amd64.exe))
-
-(rule
- (targets amd64_runtime.o)
  (deps
-  (:src ../fac/amd64_runtime.s))
- (action
-  (progn
-   (run nasm -g -F dwarf -felf64 %{src} -o %{targets}))))
+  rv64.exe
+  ;  amd64.exe
+  ))
 
-(rule
- (targets amd64_core.o)
- (deps
-  (:src amd64_core.s))
- (action
-  (run nasm -g -F dwarf -felf64 %{src} -o %{targets})))
+; (rule
+;  (targets amd64_runtime.o)
+;  (deps
+;   (:src ../fac/amd64_runtime.s))
+;  (action
+;   (progn
+;    (run nasm -g -F dwarf -felf64 %{src} -o %{targets}))))
 
-(rule
- (targets amd64.exe)
- (deps
-  (:srcasm amd64.s)
-  (:runtime amd64_runtime.o)
-  (:implo amd64_core.o))
- (mode
-  (promote (until-clean)))
- (action
-  (progn
-   (run nasm -g -F dwarf -felf64 %{srcasm} -o fac.o)
-   (run ld -g %{runtime} %{implo} fac.o -o %{targets})
-   ;(run gcc-12 -g %{runtime} fac.o -o %{targets})
-   )))
+; (rule
+;  (targets amd64_core.o)
+;  (deps
+;   (:src amd64_core.s))
+;  (action
+;   (run nasm -g -F dwarf -felf64 %{src} -o %{targets})))
+
+; (rule
+;  (targets amd64.exe)
+;  (deps
+;   (:srcasm amd64.s)
+;   (:runtime amd64_runtime.o)
+;   (:implo amd64_core.o))
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (progn
+;    (run nasm -g -F dwarf -felf64 %{srcasm} -o fac.o)
+;    (run ld -g %{runtime} %{implo} fac.o -o %{targets})
+;    ;(run gcc-12 -g %{runtime} fac.o -o %{targets})
+;    )))
 
 ; (rule
 ;  (targets benchmark.exe)

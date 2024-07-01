@@ -24,14 +24,35 @@ rv64_simple_needs_escaping:
   li a0, 1
   ret
 
-.global rv64_fuck
-rv64_fuck: #a0 is input
-  mv a3, a0
-  vsetvli a1, x0, e8, m8, ta, ma  # Vector of bytes of maximum length
-  vle8ff.v v8, (a3)     # Load bytes
+.global rv64_only_digits
+rv64_only_digits: #a0 is input, a1 is length
+  # return 0 if only digits, else 1
+  # a6 is temporary
+  # a7 is effective vector length
+.only_digits_loop:
+  vsetvli a7, a1, e8, m8 # e8 -- element size (1 byte)
+  vle8.v v0, (a0)     # Load bytes
   csrr a1, vl           # Get bytes read
-  li a1, 0x30
-  vminu.vx v9, v8, a1    # vector-scalar
+  li t0, 0x30
+  vminu.vx v8, v0, t0
+  li t0, 0x39
+  vmaxu.vx v16, v0, t0
+  vsub.vv v24, v16, v8   # subtract max and min
+  li t0, 0x9
+  vmsne.vx v24, v24, t0
+  vfirst.m t0, v24
+  li t1, -1
+  xor t0, t0, t1
+  bne t0, zero, .only_digits_error
+  sub a1, a1, a7
+  add a0, a0, a7
+  bgt a1, zero, .only_digits_loop
+  j .only_digits_success
+.only_digits_success:
+  li a0, 0
+  ret
+.only_digits_error:
+  li a0, 1
   ret
 
 # size_t strlen(const char *str)
