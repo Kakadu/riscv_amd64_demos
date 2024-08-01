@@ -1,0 +1,30 @@
+(rule
+ (targets rv64_runtime.o)
+ (deps ../fac/rv64_runtime.s)
+ (action
+  (run riscv64-linux-gnu-as -march=rv64gc %{deps} -o %{targets})))
+
+(rule
+ (targets rv64.exe)
+ (deps
+  (:src rv64.s)
+  (:runtime rv64_runtime.o))
+ (mode
+  (promote (until-clean)))
+ (action
+  (progn
+   (run riscv64-linux-gnu-as -march=rv64gc %{src} -o rv64.o)
+   (run riscv64-linux-gnu-ld %{runtime} rv64.o -o %{targets}))))
+
+(cram
+ (deps
+  rv64.exe
+  demo_in_c.exe
+  ;
+  ))
+
+(rule
+ (targets demo_in_c.exe)
+ (deps demo_in_c.c)
+ (action
+  (run riscv64-linux-gnu-gcc -o %{targets} %{deps})))
