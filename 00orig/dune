@@ -1,0 +1,62 @@
+(cram
+ (deps mini.exe fac.exe fack.exe))
+
+(rule
+ (deps mini.ml)
+ (targets mini.s mini.o mini.exe.startup.s mini.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   mini.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps fac.ml)
+ (targets fac.s fac.o fac.exe.startup.s fac.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   fac.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps fack.ml)
+ (targets fack.s fack.o fack.exe.startup.s fack.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   fack.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
