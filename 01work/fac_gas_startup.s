@@ -1,13 +1,14 @@
 	.file ""
-	.section .rodata.cst16,"aM",@progbits,16
-	.align	16
-caml_negf_mask:
-	.quad	0x8000000000000000
-	.quad	0
-	.align	16
-caml_absf_mask:
-	.quad	0x7fffffffffffffff
-	.quad	-1
+#	.section .rodata.cst16,"aM",@progbits,16
+# 	.align	16
+# caml_negf_mask:
+# 	.quad	0x8000000000000000
+# 	.quad	0
+# 	.align	16
+# caml_absf_mask:
+# 	.quad	0x7fffffffffffffff
+# 	.quad	-1
+
 	.data
 	.globl	caml_startup__data_begin
 caml_startup__data_begin:
@@ -19,9 +20,7 @@ caml_startup__code_begin:
 .align	16
 .globl	caml_program
 caml_program:
-	#.cfi_startproc
 	subq	$8, %rsp
-#	.cfi_adjust_cfa_offset 8
 .L126:
 	call	camlMini__entry@PLT
 .L127:
@@ -29,21 +28,15 @@ caml_program:
 	addq	$1, (%rax)
 	movl	$1, %eax
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type caml_program,@function
 	.size caml_program,. - caml_program
 
-	.text
-	.align	16
-	.globl	caml_curry2
+.text
+.align	16
+.globl	caml_curry2
 caml_curry2:
-	#.cfi_startproc
 	subq	$8, %rsp
-	#.cfi_adjust_cfa_offset 8
 .L128:
 	subq	$40, %r15
 	cmpq	(%r14), %r15
@@ -59,25 +52,19 @@ caml_curry2:
 	movq	%rbx, 24(%rdi)
 	movq	%rdi, %rax
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
 .L129:
 	call	caml_call_gc@PLT
 .L130:
 	jmp	.L131
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type caml_curry2,@function
 	.size caml_curry2,. - caml_curry2
 
 .text
-	.align	16
-	.globl	caml_curry2_1
+.align	16
+.globl	caml_curry2_1
 caml_curry2_1:
-	#.cfi_startproc
 	subq	$8, %rsp
-	#.cfi_adjust_cfa_offset 8
 .L132:
 	movq	%rax, %rsi
 	cmpq	(%r14), %r15
@@ -88,21 +75,17 @@ caml_curry2_1:
 	movq	16(%rdi), %rdx
 	movq	%rsi, %rbx
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	jmp	*%rdx
-	#.cfi_adjust_cfa_offset 8
 .L133:
 	call	caml_call_gc@PLT
 .L135:
 	jmp	.L134
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type caml_curry2_1,@function
 	.size caml_curry2_1,. - caml_curry2_1
 
 .text
-	.align	16
-	.globl	caml_apply3
+.align	16
+.globl	caml_apply3
 caml_apply3:
 	.cfi_startproc
 	subq	$24, %rsp
@@ -143,12 +126,10 @@ caml_apply3:
 	.size caml_apply3,. - caml_apply3
 
 .text
-	.align	16
-	.globl	caml_apply2
+.align	16
+.globl	caml_apply2
 caml_apply2:
-	.cfi_startproc
 	subq	$8, %rsp
-	.cfi_adjust_cfa_offset 8
 .L141:
 	movq	8(%rdi), %rsi
 	sarq	$56, %rsi
@@ -156,9 +137,7 @@ caml_apply2:
 	jne	.L140
 	movq	16(%rdi), %rsi
 	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	jmp	*%rsi
-	.cfi_adjust_cfa_offset 8
 	.align	4
 .L140:
 	movq	%rbx, (%rsp)
@@ -170,17 +149,14 @@ caml_apply2:
 	movq	(%rbx), %rdi
 	movq	(%rsp), %rax
 	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	jmp	*%rdi
-	.cfi_adjust_cfa_offset 8
-	.cfi_adjust_cfa_offset -8
-	.cfi_endproc
 	.type caml_apply2,@function
 	.size caml_apply2,. - caml_apply2
 
+# exceptions
 .data
-	.align	8
-	.quad	3064
+.align	8
+.quad	3064
 .globl	caml_exn_Out_of_memory
 caml_exn_Out_of_memory:
 	.quad	caml_startup__1
@@ -202,7 +178,6 @@ caml_startup__2:
 	.ascii	"Sys_error"
 	.space	6
 	.byte	6
-
 .data
 	.align	8
 	.quad	3064
@@ -421,4 +396,4 @@ caml_startup__frametable:
 	.align	8
 	.align	8
 	.size caml_startup__frametable,. - caml_startup__frametable
-	.section .note.GNU-stack,"",%progbits
+#	.section .note.GNU-stack,"",%progbits

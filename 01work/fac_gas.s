@@ -71,7 +71,8 @@ camlMini__apply_arg_70:
 	.globl	camlMini__Pccall_73
 camlMini__Pccall_73:
 	.quad	1
-	.data
+
+.data
 	.align	8
 	.globl	camlMini__gc_roots
 camlMini__gc_roots:
@@ -349,5 +350,6 @@ camlMini__data_end:
 # 	.ascii	"Mini.string_of_int\0"
 # 	.align	8
 # 	.size camlMini__frametable,. - camlMini__frametable
+#.section .note.GNU-stack,"",%progbits
+#
 
-.section .note.GNU-stack,"",%progbits

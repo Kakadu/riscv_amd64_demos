@@ -47,3 +47,38 @@
 
 (cram
  (deps fac_gas.exe))
+
+;;;;;;;;;;;;;;;;;;;;;;
+
+; (rule
+;  (target fac_intel_startup.s)
+;  (deps fac_gas_startup.s)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run intel2gas -g %{deps} -o %{target})))
+
+(rule
+ (deps fac_intel_startup.s)
+ (targets fac_intel_startup.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run nasm -o %{targets} %{deps})))
+
+(rule
+ (deps fac_intel.s)
+ (targets fac_intel.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run nasm -o %{targets} %{deps})))
+
+(rule
+ (deps fac_intel_startup.o fac_intel.o)
+ (targets fac_intel.exe)
+ (action
+  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+(cram
+ (deps fac_intel.exe))
