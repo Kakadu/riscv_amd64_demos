@@ -64,7 +64,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -f elf -o %{targets} %{deps})))
+  (run nasm -f elf64 -o %{targets} %{deps})))
 
 (rule
  (deps fac_intel.s)

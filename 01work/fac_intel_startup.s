@@ -24,53 +24,41 @@ SECTION .text
 ALIGN 16
 GLOBAL  caml_program
 caml_program:
-;MISMATCH: "        subq    $8, %rsp"
         sub rsp, 8
 L126:
         call    camlMini__entry@PLT
 L127:
         mov    rax, [caml_globals_inited@GOTPCREL + rip]
 ;MISMATCH: "        addq    $1, (%rax)"
-        add   [rax], 1
-        mov    eax, 1
-; MISMATCH: "        addq    $8, %rsp"
-        add rsp, 8
-        ;.cfi_adjust_cfa_offset -8
-        ret
-        ;.cfi_adjust_cfa_offset 8
-        ;.cfi_adjust_cfa_offset -8
-        ;.cfi_endproc
-        GLOBAL caml_program:function
-MISMATCH: "        .size caml_program,. - caml_program"
+        add   qword [rax], 1
 
-        SECTION .text
+        mov   eax, 1
+        add rsp, 8
+        ret
+
+GLOBAL caml_program:function
+; MISMATCH: "        .size caml_program,. - caml_program"
+
+SECTION .text
         ALIGN 16
         GLOBAL  caml_curry2
 caml_curry2:
-        ;.cfi_startproc
-; MISMATCH: "        subq    $8, %rsp"
         sub rsp, 8
-        ;.cfi_adjust_cfa_offset 8
 L128:
-; MISMATCH: "        subq    $40, %r15"
         sub r15, 40
-; MISMATCH: "        cmpq    (%r14), %r15"
-        cmp r15, QWORD PTR [r14]
+        cmp r15, QWORD [r14]
         jb L129
 L131:
-; MISMATCH: "        leaq    8(%r15), %rdi"
         lea rdi, [r15+8]
-; MISMATCH: "        movq    $4343, -8(%rdi)"
-        mov qword ptr [rdi-8], 4343
+        mov qword   [rdi-8], 4343
         mov    rsi, [caml_curry2_1@GOTPCREL+rip]
-        mov    qword ptr [rdi],rsi
+        mov    qword [rdi],rsi
 ; MISMATCH: "        movabsq $72057594037927941, %rsi"
-        movabs rsi, 72057594037927941
-        mov    qword ptr [rdi+8], rsi
-        mov    qword ptr [rdi+16], rax
-        mov    qword ptr [rdi+24], rbx
+        mov    rsi, qword 100000000000005H
+        mov    qword [rdi+8], rsi
+        mov    qword [rdi+16], rax
+        mov    qword [rdi+24], rbx
         mov    rax,rdi
-; MISMATCH: "        addq    $8, %rsp"
         add rsp, 8
         ret
 L129:
@@ -79,30 +67,24 @@ L130:
         jmp L131
 
 GLOBAL caml_curry2:function
-MISMATCH: "        .size caml_curry2,. - caml_curry2"
+; MISMATCH: "        .size caml_curry2,. - caml_curry2"
 
 SECTION .text
         ALIGN 16
         GLOBAL  caml_curry2_1
 caml_curry2_1:
-; MISMATCH: "        subq    $8, %rsp"
         sub rsp, 8
-        ;.cfi_adjust_cfa_offset 8
 L132:
         mov    rsi,rax
-; MISMATCH: "        cmpq    (%r14), %r15"
-        cmp r15,QWORD PTR [r14]
+        cmp r15,QWORD  [r14]
         jbe L133
 L134:
-        mov    rdi, QWORD PTR [rbx+24]
-        mov    rax, QWORD PTR [rbx+16]
-        mov    rdx, QWORD PTR [rdi+16]
+        mov    rdi, QWORD [rbx+24]
+        mov    rax, QWORD [rbx+16]
+        mov    rdx, QWORD [rdi+16]
         mov    rbx,rsi
-; MISMATCH: "        addq    $8, %rsp"
         add rsp, 8
-        ;.cfi_adjust_cfa_offset -8
         jmp     rdx
-        ;.cfi_adjust_cfa_offset 8
 L133:
         call    caml_call_gc@PLT
 L135:
@@ -115,40 +97,31 @@ SECTION .text
         ALIGN 16
         GLOBAL  caml_apply3
 caml_apply3:
-; MISMATCH: "        .cfi_startproc"
-; MISMATCH: "        subq    $24, %rsp"
         sub rsp, 24
-; MISMATCH: "        .cfi_adjust_cfa_offset 24"
 L137:
-        mov    rdx, QWORD PTR  [rsi+8]
-; MISMATCH: "        sarq    $56, %rdx"
+        mov    rdx, QWORD  [rsi+8]
         sar rdx, 56
-; MISMATCH: "        cmpq    $3, %rdx"
         cmp rdx, 3
         jne L136
-        movq    rdx,[rsi+16]
-; MISMATCH: "        addq    $24, %rsp"
+        mov    rdx, qword [rsi+16]
         add rsp, 24
-; MISMATCH: "        .cfi_adjust_cfa_offset -24"
         jmp     rdx
-; MISMATCH: "        .cfi_adjust_cfa_offset 24"
         ALIGN 4
 L136:
-        mov QWORD PTR    [rsp+8],rdi
-        mov QWORD PTR    [rsp],rbx
-        mov      rdi, QWORD PTR [rsi]
+        mov QWORD    [rsp+8],rdi
+        mov QWORD    [rsp],rbx
+        mov     rdi, QWORD [rsi]
         mov     rbx,rsi
         call    rdi
 L138:
-        movq    rbx,rax
-        movq    rdi, QWORD PTR [rbx]
-        movq    rax, QWORD PTR [rsp]
+        movq    rbx, rax
+        movq    rdi, QWORD [rbx]
+        movq    rax, QWORD [rsp]
         call    rdi
 L139:
-        mov    rbx,rax
-        mov    rdi, QWORD PTR [rbx]
-        mov    rax, QWORD PTR [rsp+8]
-; MISMATCH: "        addq    $24, %rsp"
+        mov    rbx, rax
+        mov    rdi, QWORD [rbx]
+        mov    rax, QWORD [rsp+8]
         add rsp, 24
         jmp     rdi
 GLOBAL caml_apply3:function
@@ -158,39 +131,30 @@ SECTION .text
         ALIGN 16
         GLOBAL  caml_apply2
 caml_apply2:
-MISMATCH: "        subq    $8, %rsp"
         sub rsp, 8
-; MISMATCH: "        .cfi_adjust_cfa_offset 8"
 L141:
-        mov    rsi, QWORD PTR [rdi+8]
-; MISMATCH: "        sarq    $56, %rsi"
+        mov    rsi, QWORD [rdi+8]
         sar rsi, 56
-; MISMATCH: "        cmpq    $2, %rsi"
         cmp rsi, 2
         jne L140
-        mov    rsi, QWORD PTR [rdi+16]
-; MISMATCH: "        addq    $8, %rsp"
+        mov    rsi, QWORD [rdi+16]
         add rsp, 8
-; MISMATCH: "        .cfi_adjust_cfa_offset -8"
         jmp     rsi
-; MISMATCH: "        .cfi_adjust_cfa_offset 8"
         ALIGN 4
 L140:
-        mov     QWORD PTR [rsp],rbx
-        mov     rsi, QWORD PTR  [rdi]
-        mov     rbx,rdi
+        mov     QWORD  [rsp],rbx
+        mov     rsi, QWORD  [rdi]
+        mov     rbx, rdi
         call    rsi
 L142:
-        mov    rbx,rax
-        mov    rdi, QWORD PTR [rbx]
-        mov    rax, QWORD PTR [rsp]
-; MISMATCH: "        addq    $8, %rsp"
+        mov    rbx, rax
+        mov    rdi, QWORD [rbx]
+        mov    rax, QWORD [rsp]
         add rsp, 8
-; MISMATCH: "        .cfi_adjust_cfa_offset -8"
         jmp     rdi
 
 GLOBAL caml_apply2:function
-MISMATCH: "        .size caml_apply2,. - caml_apply2"
+;MISMATCH: "        .size caml_apply2,. - caml_apply2"
 
 SECTION .data
         ALIGN 8
@@ -513,8 +477,7 @@ caml_startup__frametable:
         ALIGN 8
         ALIGN 8
 ;MISMATCH: "        .size caml_startup__frametable,. - caml_startup__frametable"
-.att_syntax noprefix
-        .size caml_startup__frametable,. - caml_startup__frametable
+        ; .size caml_startup__frametable,. - caml_startup__frametable
 
 ;MISMATCH: "        .section .note.GNU-stack,"",%progbits"
 section .note.GNU-stack  progbits
