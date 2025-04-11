@@ -64,7 +64,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -o %{targets} %{deps})))
+  (run nasm -f elf -o %{targets} %{deps})))
 
 (rule
  (deps fac_intel.s)
@@ -72,7 +72,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -o %{targets} %{deps})))
+  (run as -Mintel -o %{targets} %{deps})))
 
 (rule
  (deps fac_intel_startup.o fac_intel.o)
