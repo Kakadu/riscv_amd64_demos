@@ -1,6 +1,8 @@
+extern caml_call_gc
         ;FILE ""
+; "aM" == allocatable mergable
 ;MISMATCH: "        .section .rodata.cst16,"aM",@progbits,16"
-section .rodata "aM" @progbits 16
+section .rodata "aM" progbits align=16
         ALIGN 16
 caml_negf_mask:
 ; MISMATCH: "        .quad   0x8000000000000000"
