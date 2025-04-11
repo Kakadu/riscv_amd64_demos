@@ -1,4 +1,14 @@
 extern caml_call_gc
+extern caml_system__frametable
+extern caml_globals_inited
+
+extern camlMini__entry
+extern camlMini__data_begin
+extern camlMini__data_end
+extern camlMini__code_begin
+extern camlMini__code_end
+extern camlMini__gc_roots
+
         ;FILE ""
 ; "aM" == allocatable mergable
 ;MISMATCH: "        .section .rodata.cst16,"aM",@progbits,16"
@@ -28,9 +38,11 @@ GLOBAL  caml_program
 caml_program:
         sub rsp, 8
 L126:
-        call    camlMini__entry@PLT
+        ;call    camlMini__entry@PLT
+        call    camlMini__entry  ; Is it OK???
 L127:
-        mov    rax, [caml_globals_inited@GOTPCREL + rip]
+        ;mov    rax, [caml_globals_inited@GOTPCREL + rip]
+        mov    rax, [caml_globals_inited wrt ..got]    ; is it OK???
 ;MISMATCH: "        addq    $1, (%rax)"
         add   qword [rax], 1
 
@@ -53,7 +65,8 @@ L128:
 L131:
         lea rdi, [r15+8]
         mov qword   [rdi-8], 4343
-        mov    rsi, [caml_curry2_1@GOTPCREL+rip]
+        ;mov    rsi, [caml_curry2_1@GOTPCREL+rip]
+        mov    rsi, [caml_curry2_1 wrt ..got]
         mov    qword [rdi],rsi
 ; MISMATCH: "        movabsq $72057594037927941, %rsi"
         mov    rsi, qword 100000000000005H
@@ -64,7 +77,8 @@ L131:
         add rsp, 8
         ret
 L129:
-        call    caml_call_gc@PLT
+        ; call    caml_call_gc@PLT
+        call    caml_call_gc ; ????
 L130:
         jmp L131
 
@@ -88,7 +102,8 @@ L134:
         add rsp, 8
         jmp     rdx
 L133:
-        call    caml_call_gc@PLT
+        ; call    caml_call_gc@PLT
+        call    caml_call_gc ; ????
 L135:
         jmp L134
 
@@ -116,9 +131,9 @@ L136:
         mov     rbx,rsi
         call    rdi
 L138:
-        movq    rbx, rax
-        movq    rdi, QWORD [rbx]
-        movq    rax, QWORD [rsp]
+        mov     rbx, rax
+        mov     rdi, QWORD [rbx]
+        mov     rax, QWORD [rsp]
         call    rdi
 L139:
         mov    rbx, rax
@@ -437,26 +452,26 @@ caml_startup__frametable:
 ;MISMATCH: "        .quad   6"
         dq 6
 ;MISMATCH: "        .quad   .L142"
-        dq .L142
+        dq L142
         dw      16
         dw      1
         dw      0
         ALIGN 8
 ;MISMATCH: "        .quad   .L139"
-        dq  .L139
+        dq  L139
         dw      32
         dw      1
         dw      8
         ALIGN 8
 ;MISMATCH: "        .quad   .L138"
-        dq .L138
+        dq L138
         dw      32
         dw      2
         dw      0
         dw      8
         ALIGN 8
 ; MISMATCH: "        .quad   .L135"
-        dq .L135
+        dq L135
         dw      18
         dw      2
         dw      3
@@ -464,7 +479,7 @@ caml_startup__frametable:
         db      0
         ALIGN 8
 ;MISMATCH: "        .quad   .L130"
-        dq .L130
+        dq L130
         dw      18
         dw      2
         dw      1
@@ -473,7 +488,7 @@ caml_startup__frametable:
         db      3
         ALIGN 8
 ;MISMATCH: "        .quad   .L127"
-        dq .L127
+        dq L127
         dw      16
         dw      0
         ALIGN 8
