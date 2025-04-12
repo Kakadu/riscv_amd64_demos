@@ -1,0 +1,102 @@
+(cram
+ (deps print_endline.gas.txt print_endline.nasm.txt))
+
+(rule
+ (deps facacc_gas.exe)
+ (targets print_endline.gas.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run
+     objdump
+     -D
+     -Mintel-mnemonic
+     --disassemble=camlFacacc__print_endline_43
+     %{deps})
+    (run head -n-4)
+    ;(run tail -n 20)
+    ))))
+
+(rule
+ (deps fac_nasm.exe)
+ (targets print_endline.nasm.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run
+     objdump
+     -D
+     -Mintel-mnemonic
+     --disassemble=camlFacacc__print_endline_43
+     %{deps})
+    (run head -n 29)
+    ;(run tail -n 20)
+    ))))
+
+(cram
+ (deps entry.gas.txt entry.nasm.txt))
+
+(rule
+ (deps facacc_gas.exe)
+ (targets entry.gas.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run objdump -D -Mintel-mnemonic --disassemble=camlFacacc__entry %{deps})
+    (run head -n-5)
+    ;(run tail -n 28)
+    ))))
+
+(rule
+ (deps fac_nasm.exe)
+ (targets entry.nasm.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run objdump -D -Mintel-mnemonic --disassemble=camlFacacc__entry %{deps})
+    (run head -n-5)
+    ;(run tail -n 28)
+    ))))
+
+(cram
+ (deps fac58.gas.txt fac58.nasm.txt))
+
+(rule
+ (deps facacc_gas.exe)
+ (targets fac58.gas.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run objdump -D -Mintel-mnemonic --disassemble=camlFacacc__fac_58 %{deps})
+    (run head -n-5)
+    ;(run tail -n 28)
+    ))))
+
+(rule
+ (deps fac_nasm.exe)
+ (targets fac58.nasm.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{targets}
+   (pipe-stdout
+    (run objdump -D -Mintel-mnemonic --disassemble=camlFacacc__fac_58 %{deps})
+    (run head -n-5)
+    ;(run tail -n 28)
+    ))))

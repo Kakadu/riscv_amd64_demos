@@ -60,3 +60,26 @@
    -lasmrun
    -ccopt
    -lm)))
+
+(cram
+ (deps fac_acc.exe))
+
+(rule
+ (deps fac_acc.ml)
+ (targets fac_acc.s fac_acc.o fac_acc.exe.startup.s fac_acc.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   fac_acc.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))

@@ -1,0 +1,24 @@
+(rule
+ (deps MAIN.ml)
+ (targets MAIN.s MAIN.o MAIN.exe.startup.s MAIN.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -inline
+   0
+   -verbose
+   -o
+   MAIN.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(cram
+ (deps MAIN.exe))
