@@ -326,7 +326,8 @@ caml_data_segments:
 	.quad	camlMini__data_begin
 	.quad	camlMini__data_end
 	.quad	0
-	.data
+
+.data
 	.align	8
 	.globl	caml_code_segments
 caml_code_segments:
@@ -335,7 +336,8 @@ caml_code_segments:
 	.quad	camlMini__code_begin
 	.quad	camlMini__code_end
 	.quad	0
-	.data
+
+.data
 	.align	8
 	.globl	caml_frametable
 caml_frametable:
@@ -343,7 +345,7 @@ caml_frametable:
 	.quad	caml_system__frametable
 	#.quad	camlMini__frametable
 	.quad	0
-	.text
+.text
 	.globl	caml_startup__code_end
 caml_startup__code_end:
 	.data
@@ -355,6 +357,7 @@ caml_startup__code_end:
 	.globl	caml_startup__data_end
 caml_startup__data_end:
 	.quad	0
+
 	.align	8
 	.globl	caml_startup__frametable
 caml_startup__frametable:

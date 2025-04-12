@@ -1,3 +1,5 @@
+(include dune.objdump)
+
 (rule
  (deps mini_gas_startup.s)
  (targets mini_gas_startup.o)
@@ -42,6 +44,8 @@
 (rule
  (deps fac_gas_startup.o fac_gas.o)
  (targets fac_gas.exe)
+ (mode
+  (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
@@ -64,7 +68,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -f elf64 -o %{targets} %{deps})))
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
 
 (rule
  (deps fac_intel.s)
@@ -72,11 +76,13 @@
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -f elf64 -o %{targets} %{deps})))
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
 
 (rule
  (deps fac_intel_startup.o fac_intel.o)
  (targets fac_intel.exe)
+ (mode
+  (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 

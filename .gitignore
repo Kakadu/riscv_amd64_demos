@@ -1,2 +1,5 @@
 *.exe
+a.out
+*.cm[ioxa]
+01work/gdb.txt
 

@@ -85,9 +85,7 @@ camlMini__gc_roots:
 	.align	16
 	.globl	camlMini__string_of_int_18
 camlMini__string_of_int_18:
-	#.cfi_startproc
 	subq	$8, %rsp
-	#.cfi_adjust_cfa_offset 8
 .L100:
 	movq	camlMini__const_immstring_22@GOTPCREL(%rip), %rdi
 	movq	%rax, %rsi
@@ -96,21 +94,29 @@ camlMini__string_of_int_18:
 .L101:
 	movq	8(%r14), %r15
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type camlMini__string_of_int_18,@function
 	.size camlMini__string_of_int_18,. - camlMini__string_of_int_18
+
+/*
+(function{mini.ml:14,18-72} camlMini__output_string_28 (oc/43: val s/42: val)
+ (let
+   Pccall_arg/44
+     (+
+       (<<
+         (let tmp/65 (- (<< (>>u (load_mut int (+a s/42 -8)) 10) 3) 1)
+           (- tmp/65 (load_mut unsigned int8 (+a s/42 tmp/65))))
+         1)
+       1)
+   (extcall "caml_ml_output"{mini.ml:15,2-47} oc/43 s/42 1 Pccall_arg/44
+     int,int,int,int->val)))
+*/
 
 .text
 	.align	16
 	.globl	camlMini__output_string_28
 camlMini__output_string_28:
-	#.cfi_startproc
 	subq	$8, %rsp
-	#.cfi_adjust_cfa_offset 8
 .L102:
 	movq	-8(%rbx), %rdi
 	shrq	$10, %rdi
@@ -126,11 +132,7 @@ camlMini__output_string_28:
 .L103:
 	movq	8(%r14), %r15
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type camlMini__output_string_28,@function
 	.size camlMini__output_string_28,. - camlMini__output_string_28
 
@@ -161,19 +163,9 @@ camlMini__print_endline_40:
 .L107:
 	movq	8(%r14), %r15
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type camlMini__print_endline_40,@function
 	.size camlMini__print_endline_40,. - camlMini__print_endline_40
-	.data
-	.align	8
-	.data
-	.align	8
-	.data
-	.align	8
 
 .data
 	.align	8
@@ -184,13 +176,22 @@ camlMini__const_immstring_22:
 	.space	5
 	.byte	5
 
+/*
+(function camlMini__entry ()
+ (store val(root-init) "camlMini__Pccall_73"
+   (extcall "caml_ml_open_descriptor_out"{mini.ml:4,13-34} 3 int->val))
+ (store val(root-init) "camlMini__apply_arg_70"
+   (app{mini.ml:22,23-41} "camlMini__string_of_int_18" 85 val))
+ (app{mini.ml:22,9-41} "camlMini__print_endline_40"
+   (load_mut val "camlMini__apply_arg_70") unit)
+ (store val(root-init) "camlMini" (load_mut val "camlMini__Pccall_73")) 1)
+*/
+
 .text
 	.align	16
 	.globl	camlMini__entry
 camlMini__entry:
-	#.cfi_startproc
 	subq	$8, %rsp
-	#.cfi_adjust_cfa_offset 8
 .L108:
 	movl	$3, %edi
 	movq	caml_ml_open_descriptor_out@GOTPCREL(%rip), %rax
@@ -214,13 +215,10 @@ camlMini__entry:
 	movq	%rbx, (%rax)
 	movl	$1, %eax
 	addq	$8, %rsp
-	#.cfi_adjust_cfa_offset -8
 	ret
-	#.cfi_adjust_cfa_offset 8
-	#.cfi_adjust_cfa_offset -8
-	#.cfi_endproc
 	.type camlMini__entry,@function
 	.size camlMini__entry,. - camlMini__entry
+
 	.data
 	.align	8
 	.quad	caml_ml_output
