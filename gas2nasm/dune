@@ -1,13 +1,30 @@
-(executable
- (name gas2nasm)
- (libraries angstrom)
- (preprocess
-  (pps ppx_deriving.show)))
-
-(cram
- (deps ./gas2nasm.exe tests/tuple1.ml))
-
 (env
  (dev
   (flags
    (:standard -warn-error -27-32-37))))
+
+(library
+ (name lib)
+ (libraries angstrom)
+ (modules lib)
+ (wrapped false)
+ (preprocess
+  (pps ppx_deriving.show)))
+
+(executable
+ (name gas2nasm)
+ (modules gas2nasm)
+ (libraries angstrom lib)
+ (preprocess
+  (pps ppx_deriving.show)))
+
+(library
+ (name tests1)
+ (modules tests1)
+ (libraries lib)
+ ;  (inline_tests)
+ (preprocess
+  (pps ppx_inline_test_nobase ppx_expect_nobase)))
+
+(cram
+ (deps ./gas2nasm.exe tests/tuple1.ml))

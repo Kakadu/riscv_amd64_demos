@@ -1,0 +1,362 @@
+open Format
+
+include struct
+  open Angstrom
+
+  let conde xs = List.fold_left ( <|> ) (fail "") xs
+
+  type reg = R [@@deriving show { with_path = false }]
+
+  type arg =
+    | Star_rdx
+    | AReg of reg
+    | AReg_off1 of int * reg
+    | AReg_off2 of int * reg * int
+    | AReg_off3 of int option * reg * reg  (** [(%rbx,%rdi)], [1(%rdi,%rdi)]  *)
+    | ADeref of reg
+    | AConst of int
+    | ALab_pcrel of string
+  [@@deriving show { with_path = false }]
+
+  type op =
+    | CMP
+    | MOV
+    | MOVABS
+    | ADD
+    | SUB
+    | IMUL
+    | SHR
+    | SAR
+    | LEA
+    | MOVZB
+    | DEC
+    | INC
+  [@@deriving show { with_path = false }]
+
+  type t =
+    | CFI
+    | Size
+    | Ascii of string
+    | Space of int
+    | Section of string list
+    | Align of int
+    | Label of string
+    | Global of string
+    | Type of string list
+    | DB of int
+    | DW_int of int
+    | DL of string * int  (** [.long	(.L121 - .) + -67108864] *)
+    | DL2 of int
+    | DQ of string  (** for labels *)
+    | DQ_hex of string
+    | DQ_int of int
+    | Binop of op * arg * arg
+    | Jb of string
+    | Jbe of string
+    | Jle of string
+    | Jne of string
+    | Jmp of string
+    | Jmp_reg of reg
+    | Inc of reg
+    | Dec of reg
+    | Call of string
+    | Call_reg of reg
+    | Ret
+  [@@deriving show { with_path = false }]
+
+  let cmpq a b = Binop (CMP, a, b)
+  let movq a b = Binop (MOV, a, b)
+  let movabsq a b = Binop (MOVABS, a, b)
+  let addq a b = Binop (ADD, a, b)
+  let subq a b = Binop (SUB, a, b)
+  let imulq a b = Binop (IMUL, a, b)
+  let shrq a b = Binop (SHR, a, b)
+  let sarq a b = Binop (SAR, a, b)
+  let leaq a b = Binop (LEA, a, b)
+  let movzbq a b = Binop (MOVZB, a, b)
+
+  let comment =
+    let helper =
+      fix (fun self ->
+          let* c = any_char in
+          match c with
+          | '*' ->
+              let* next = peek_char_fail in
+              if next = '/' then any_char *> return () else self
+          | _ -> self)
+    in
+    string "/*" *> helper
+
+  let is_sep = function ' ' | '\t' | '\n' | '\r' -> true | _ -> false
+  let ws = skip_while is_sep <* option () comment <* skip_while is_sep
+
+  let psection =
+    conde
+      [
+        (let* _ = ws *> string ".section" <* ws in
+         let* args =
+           sep_by (char ',')
+             ( many1 (satisfy (fun c -> c <> ',' && c <> '\n')) >>| fun xs ->
+               String.of_seq (List.to_seq xs) )
+         in
+         return (Section args));
+        (ws *> string ".data" <* ws >>| fun _ -> Section [ ".data" ]);
+        (ws *> string ".text" <* ws >>| fun _ -> Section [ ".text" ]);
+      ]
+
+  let string_cond cond =
+    many1 (satisfy cond) >>| fun xs -> String.of_seq (List.to_seq xs)
+
+  let nat =
+    many1 (satisfy (function '0' .. '9' -> true | _ -> false))
+    >>| List.fold_left (fun acc x -> (acc * 10) + Char.code x - Char.code '0') 0
+
+  let palign = ws *> string ".align" *> ws *> nat >>| fun n -> Align n
+
+  let is_hex_char = function
+    | '0' .. '9' | 'A' .. 'F' | 'a' .. 'f' -> true
+    | _ -> false
+
+  let is_ident_char = function
+    | 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' -> true
+    | _ -> false
+
+  let is_label_char = function '.' | '_' -> true | x -> is_ident_char x
+  let label_ident = string_cond is_label_char
+  let plabel = label_ident <* char ':' <* ws >>| fun s -> Label s
+  let pdw = ws *> string ".word" *> ws *> conde [ (nat >>| fun n -> DW_int n) ]
+
+  let pdl =
+    let* () = ws *> string ".long" *> ws in
+    conde
+      [
+        (let* lab = char '(' *> label_ident <* string " - .) + " in
+         let* rhs = conde [ char '-' *> nat; nat ] in
+         return (DL (lab, rhs)));
+        (nat >>| fun n -> DL2 n);
+      ]
+
+  let pdq =
+    ws *> string ".quad" *> ws
+    *> conde
+         [
+           (string "0x" *> string_cond is_hex_char >>| fun s -> DQ_hex s);
+           (char '0' <* ws >>| fun _ -> DQ "0");
+           (char '-' *> nat >>| fun n -> DQ_int (-n));
+           (nat >>| fun n -> DQ_int n);
+           (string_cond is_label_char >>| fun s -> DQ s);
+         ]
+
+  let ptype =
+    ws *> string ".type" *> ws
+    *> sep_by1 (char ',') (conde [ string "@function"; label_ident ])
+    >>| fun xs -> Type xs
+
+  let pspace = ws *> string ".space" *> ws *> nat >>| fun n -> Space n
+
+  let pascii =
+    let* () = ws *> string ".ascii" *> ws in
+    char '"' *> string_cond (function '"' -> false | _ -> true) <* char '"'
+    >>| fun s -> Ascii s
+
+  let psize =
+    let* _ = ws *> string ".size" <* ws <* many1 any_char in
+    return Size
+
+  let pglobl =
+    ws *> string ".globl" *> ws *> string_cond is_ident_char >>| fun s ->
+    Global s
+
+  let pcfi =
+    conde
+      [
+        (ws *> string ".cfi_startproc" >>| fun _ -> CFI);
+        (ws *> string ".cfi_endproc" >>| fun _ -> CFI);
+        (ws *> string ".cfi_adjust_cfa_offset" *> ws *> nat >>| fun _ -> CFI);
+        ( ws *> string ".cfi_adjust_cfa_offset" *> ws *> char '-' *> nat
+        >>| fun _ -> CFI );
+      ]
+
+  let preg =
+    conde
+      [
+        string "%rsp" *> return R;
+        string "%r14" *> return R;
+        string "%r15" *> return R;
+        string "%rax" *> return R;
+        string "%eax" *> return R;
+        string "%rbx" *> return R;
+        string "%rcx" *> return R;
+        string "%rdx" *> return R;
+        string "%edx" *> return R;
+        string "%rdi" *> return R;
+        string "%edi" *> return R;
+        string "%rsi" *> return R;
+        string "%esi" *> return R;
+        fail "preg";
+      ]
+
+  let parg =
+    ws
+    *> conde
+         [
+           (label_ident <* string "@GOTPCREL(%rip)" >>| fun s -> ALab_pcrel s);
+           (preg >>| fun r -> AReg r);
+           (char '(' *> preg <* char ')' >>| fun r -> ADeref r);
+           return (fun n r -> AReg_off1 (n, r))
+           <*> nat
+           <*> (char '(' *> preg <* char ')');
+           string "*%rdx" *> return Star_rdx;
+           return (fun n r -> AReg_off1 (-n, r))
+           <*> char '-' *> any_uint8
+           <*> (char '(' *> preg <* char ')');
+           return (fun n (l, r) -> AReg_off2 (-n, l, r))
+           <*> char '-' *> any_uint8
+           <*> (char '('
+                *> conde
+                     [
+                       return (fun a b -> (a, b))
+                       <*> char ',' *> preg
+                       <*> char ',' *> nat;
+                     ]
+               <* char ')');
+           return (fun off l r -> AReg_off3 (off, l, r))
+           <*> conde
+                 [
+                   (char '-' *> nat >>| fun n -> Some (-n));
+                   (nat >>| fun n -> Some n);
+                   return None;
+                 ]
+           <*> (char '(' *> preg <* char ',')
+           <*> (preg <* char ')');
+           (char '$' *> nat >>| fun r -> AConst r);
+           fail "parg";
+         ]
+
+  let pinstr =
+    let binin =
+      let* op =
+        ws *> string_cond (function 'a' .. 'z' -> true | _ -> false) <* ws
+      in
+      printf "Got %s\n%!" op;
+      let* make =
+        match op with
+        | "cmpq" -> return cmpq
+        | "movabsq" -> return movabsq
+        | "movl" | "movq" -> return movq
+        | "addq" -> return addq
+        | "subq" -> return subq
+        | "imulq" -> return imulq
+        | "shrq" -> return shrq
+        | "sarq" -> return sarq
+        | "leaq" -> return leaq
+        | "movzbq" -> return movzbq
+        | _ -> fail "Bad mnemonic"
+      in
+      let* a1 = parg in
+      let* a2 = char ',' *> ws *> parg in
+      return (make a1 a2)
+    in
+    ws
+    *> conde
+         [
+           binin;
+           (ws *> string "decq" *> ws *> preg >>| fun r -> Dec r);
+           (ws *> string "incq" *> ws *> preg >>| fun r -> Inc r);
+           (ws *> string "jbe" *> ws *> label_ident >>| fun s -> Jbe s);
+           (ws *> string "jb" <* ws *> label_ident >>| fun s -> Jb s);
+           (ws *> string "jle" <* ws *> label_ident >>| fun s -> Jle s);
+           (ws *> string "jne" <* ws *> label_ident >>| fun s -> Jne s);
+           ( ws *> string "jmp" <* ws *> label_ident <* string "@PLT"
+           >>| fun s -> Jmp s );
+           (ws *> string "jmp" *> ws *> char '*' *> preg >>| fun r -> Jmp_reg r);
+           (ws *> string "jmp" <* ws *> label_ident >>| fun s -> Jmp s);
+           ( ws *> string "call" <* ws *> label_ident <* string "@PLT"
+           >>| fun s -> Call s );
+           ( ws *> string "call" *> ws *> char '*' *> preg >>| fun r ->
+             Call_reg r );
+           (string "ret" *> ws >>| fun _ -> Ret);
+         ]
+
+  let p =
+    conde
+      [
+        psection;
+        palign;
+        plabel;
+        pdw;
+        pdl;
+        pdq;
+        (ws *> string ".byte" *> ws *> any_int8 >>| fun n -> DB n);
+        pglobl;
+        pcfi;
+        string "\t\t\t\t/* relocation table start */" *> return CFI;
+        string "\t\t\t\t/* relocation table end */" *> return CFI;
+        pinstr;
+        ptype;
+        psize;
+        pascii;
+        pspace;
+        string "" *> return CFI;
+        fail "unsupported";
+      ]
+
+  let study s =
+    match Angstrom.parse_string ~consume:Consume.All p s with x -> x
+end
+
+let translate filename =
+  let lines =
+    In_channel.with_open_text filename In_channel.input_all
+    |> String.split_on_char '\n'
+  in
+  let ppf = Format.std_formatter in
+  let printfn fmt = kasprintf (fun s -> fprintf ppf "%s\n%!" s) fmt in
+  let rec loop lines =
+    match lines with
+    | "\t.file \"\"" :: tl -> loop tl
+    | h :: tl -> (
+        match study h with
+        | Result.Error s ->
+            eprintf "line: %s\n" h;
+            eprintf "perror: %s\n" s;
+
+            exit 1
+        | Ok x ->
+            (match x with
+            | Section (".rodata.cst16" :: _) -> ()
+            | Section [ ".note.GNU-stack"; "\"\""; "%progbits" ] ->
+                printfn "section .note.GNU-stack  progbits"
+            | Section (".data" :: []) -> printfn "SECTION DATA ; ???"
+            | Section (".text" :: []) -> printfn "SECTION TEXT ; ???"
+            | Type _ -> printfn "  ; %a" pp x
+            | Size -> ()
+            | CFI -> ()
+            | Ret -> printfn "\tret"
+            | Global s -> printfn "%s: ; Global was here" s
+            | Binop (ADD, AConst n, ADeref _) -> printfn "\tadd qword [?], %d" n
+            | Binop (SUB, AConst n, _r) -> printfn "\tsub ?, %d" n
+            | Binop (ADD, AConst n, _r) -> printfn "\tadd ?, %d" n
+            | Binop (MOV, ALab_pcrel lab, _r) ->
+                printfn "\tmov ?, [rel %s wrt ..got]" lab
+            | Binop (MOV, AConst n, _) -> printfn "\tmov ?, %d" n
+            | Binop (CMP, ADeref _, AReg _) -> printfn "\tcmp ?, qword [?]"
+            | Call s -> printfn "\tcall %s" s
+            | Align n -> printfn "ALIGN %d" n
+            | Label s -> printfn "%s:" s
+            | DQ s -> printfn "\t.dq %s" s
+            | DQ_int n -> printfn "\t.dq %d" n
+            | DQ_hex s -> printfn "\t.dq 0x%s" s
+            | DW_int n -> printfn "\t.dw %d" n
+            | DB n -> printfn "\t.db %d" n
+            | Jb s -> printfn "\tjb %s" s
+            (* | (Jbe _ | Binop _ | Jmp _) as b -> printfn "  ; %a" pp b *)
+            | b ->
+                (* printfn "  ; %a" pp b *)
+                eprintf "%a\n%!" pp x;
+                let _ = failwith "not implemented" in
+                ());
+            loop tl)
+    | [] -> ()
+  in
+  loop lines
