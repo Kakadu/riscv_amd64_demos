@@ -27,4 +27,4 @@
   (pps ppx_inline_test_nobase ppx_expect_nobase)))
 
 (cram
- (deps ./gas2nasm.exe tests/tuple1.ml))
+ (deps ./gas2nasm.exe tests/tuple1_nasm.exe))

@@ -238,7 +238,7 @@ include struct
       let* op =
         ws *> string_cond (function 'a' .. 'z' -> true | _ -> false) <* ws
       in
-      printf "Got %s\n%!" op;
+      (* printf "Got %s\n%!" op; *)
       let* make =
         match op with
         | "cmpq" -> return cmpq
@@ -305,12 +305,12 @@ include struct
     match Angstrom.parse_string ~consume:Consume.All p s with x -> x
 end
 
-let translate filename =
+let translate ppf filename =
   let lines =
     In_channel.with_open_text filename In_channel.input_all
     |> String.split_on_char '\n'
   in
-  let ppf = Format.std_formatter in
+
   let printfn fmt = kasprintf (fun s -> fprintf ppf "%s\n%!" s) fmt in
   let rec loop lines =
     match lines with
@@ -320,7 +320,6 @@ let translate filename =
         | Result.Error s ->
             eprintf "line: %s\n" h;
             eprintf "perror: %s\n" s;
-
             exit 1
         | Ok x ->
             (match x with
@@ -335,21 +334,64 @@ let translate filename =
             | Ret -> printfn "\tret"
             | Global s -> printfn "%s: ; Global was here" s
             | Binop (ADD, AConst n, ADeref _) -> printfn "\tadd qword [?], %d" n
-            | Binop (SUB, AConst n, _r) -> printfn "\tsub ?, %d" n
             | Binop (ADD, AConst n, _r) -> printfn "\tadd ?, %d" n
+            | Binop (SUB, AConst n, AReg rd) ->
+                printfn "\tsub %a, %d" pp_reg rd n
+            | Binop (SUB, AReg rs, AReg rd) ->
+                printfn "\tsub %a, %a" pp_reg rd pp_reg rs
+            | Binop (IMUL, AReg rs, AReg rd) ->
+                printfn "\timul %a, %a" pp_reg rd pp_reg rs
             | Binop (MOV, ALab_pcrel lab, _r) ->
                 printfn "\tmov ?, [rel %s wrt ..got]" lab
-            | Binop (MOV, AConst n, _) -> printfn "\tmov ?, %d" n
-            | Binop (CMP, ADeref _, AReg _) -> printfn "\tcmp ?, qword [?]"
+            | Binop (MOV, AConst n, rd) -> printfn "\tmov %a, %d" pp_arg rd n
+            | Binop (MOV, AReg_off1 (n, r1), AReg rd) ->
+                printfn "\tmov %a, [%a+%d]" pp_reg rd pp_reg r1 n
+            | Binop (MOV, AReg rs, AReg_off1 (n, rd)) ->
+                printfn "\tmov [%a+%d], %a" pp_reg rd n pp_reg rs
+            | Binop (MOV, ADeref r1, AReg rd) ->
+                printfn "\tmov %a, [%a]" pp_reg rd pp_reg r1
+            | Binop (MOV, AReg rs, ADeref rd) ->
+                printfn "\tmov [%a], %a" pp_reg rd pp_reg rs
+            | Binop (MOV, AReg rs, AReg rd) ->
+                printfn "\tmov %a, %a" pp_reg rd pp_reg rs
+            | Binop (SHR, AConst n, rd) -> printfn "\tshr %a, %d" pp_arg rd n
+            | Binop (SAR, AConst n, rd) -> printfn "\tsar %a, %d" pp_arg rd n
+            | Binop (CMP, ADeref rs, AReg rd) ->
+                printfn "\tcmp %a, qword [%a]" pp_reg rd pp_reg rs
+            | Binop (CMP, AConst n, AReg rd) ->
+                printfn "\tcmp %a, %d" pp_reg rd n
+            | Binop (LEA, AReg_off1 (n, rs), AReg rd) ->
+                printfn "\tlea %a, [%a+%d]" pp_reg rd pp_reg rs n
+            | Binop (LEA, AReg_off2 (n, rs, m), AReg rd) ->
+                printfn "\tlea %a, [%a+%d+%d]" pp_reg rd pp_reg rs n m
+            | Binop (LEA, AReg_off3 (Some n, rs1, rs2), AReg rd) ->
+                printfn "\tlea %a, [%a+%a+%d]" pp_reg rd pp_reg rs1 pp_reg rs2 n
+            | Binop (MOVZB, AReg_off3 (None, rs1, rs2), AReg rd) ->
+                printfn "\tmovzb %a, [%a+%a]" pp_reg rd pp_reg rs1 pp_reg rs2
+            | Binop (MOVABS, AConst n, AReg rd) ->
+                printfn "\tmovabs %a, %d" pp_reg rd n
+            | Inc rd -> printfn "\tinc %a" pp_reg rd
+            | Dec rd -> printfn "\tdec %a" pp_reg rd
             | Call s -> printfn "\tcall %s" s
             | Align n -> printfn "ALIGN %d" n
             | Label s -> printfn "%s:" s
-            | DQ s -> printfn "\t.dq %s" s
-            | DQ_int n -> printfn "\t.dq %d" n
-            | DQ_hex s -> printfn "\t.dq 0x%s" s
-            | DW_int n -> printfn "\t.dw %d" n
-            | DB n -> printfn "\t.db %d" n
+            | DQ s -> printfn "\tdq %s" s
+            | DQ_int n -> printfn "\tdq %d" n
+            | DQ_hex s -> printfn "\tdq 0x%s" s
+            | DW_int n -> printfn "\tdw %d" n
+            | DB n -> printfn "\tdb %d" n
+            | DL (str, 0) -> printfn "\tdl (%s - $)" str
+            | DL (str, n) -> printfn "\tdl (%s - $) + %d" str n
+            | DL2 n -> printfn "\tdl %d" n
             | Jb s -> printfn "\tjb %s" s
+            | Jbe s -> printfn "\tjbe %s" s
+            | Jle s -> printfn "\tjle %s" s
+            | Jne s -> printfn "\tjne %s" s
+            | Jmp s -> printfn "\tjmp %s ; TOOD: bad label?" s
+            | Jmp_reg rd -> printfn "\tjmp %a" pp_reg rd
+            | Call_reg rd -> printfn "\tcall %a" pp_reg rd
+            | Ascii s -> printfn "\tdb \"%s\"" s
+            | Space n -> printfn "\ttimes %d db 0" n
             (* | (Jbe _ | Binop _ | Jmp _) as b -> printfn "  ; %a" pp b *)
             | b ->
                 (* printfn "  ; %a" pp b *)
