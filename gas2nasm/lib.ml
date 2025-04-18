@@ -125,7 +125,13 @@ include struct
     | _ -> false
 
   let is_label_char = function '.' | '_' -> true | x -> is_ident_char x
-  let label_ident = string_cond is_label_char
+
+  let label_ident =
+    let* lab = string_cond is_label_char in
+    if String.starts_with ~prefix:".L" lab then
+      return @@ String.sub lab 1 (String.length lab - 1)
+    else return lab
+
   let plabel = label_ident <* char ':' <* ws >>| fun s -> Label s
   let pdw = ws *> string ".word" *> ws *> conde [ (nat >>| fun n -> DW_int n) ]
 
@@ -147,7 +153,7 @@ include struct
            (char '0' <* ws >>| fun _ -> DQ "0");
            (char '-' *> nat >>| fun n -> DQ_int (-n));
            (nat >>| fun n -> DQ_int n);
-           (string_cond is_label_char >>| fun s -> DQ s);
+           (label_ident >>| fun s -> DQ s);
          ]
 
   let ptype =
@@ -268,9 +274,9 @@ include struct
            (ws *> string "decq" *> ws *> preg >>| fun r -> Dec r);
            (ws *> string "incq" *> ws *> preg >>| fun r -> Inc r);
            (ws *> string "jbe" *> ws *> label_ident >>| fun s -> Jbe s);
-           (ws *> string "jb" <* ws *> label_ident >>| fun s -> Jb s);
-           (ws *> string "jle" <* ws *> label_ident >>| fun s -> Jle s);
-           (ws *> string "jne" <* ws *> label_ident >>| fun s -> Jne s);
+           (ws *> string "jb" *> ws *> label_ident >>| fun s -> Jb s);
+           (ws *> string "jle" *> ws *> label_ident >>| fun s -> Jle s);
+           (ws *> string "jne" *> ws *> label_ident >>| fun s -> Jne s);
            ( ws *> string "jmp" *> ws *> label_ident <* string "@PLT"
            >>| fun s -> Jmp s );
            (ws *> string "jmp" *> ws *> char '*' *> preg >>| fun r -> Jmp_reg r);
@@ -291,7 +297,7 @@ include struct
         pdw;
         pdl;
         pdq;
-        (ws *> string ".byte" *> ws *> any_int8 >>| fun n -> DB n);
+        (ws *> string ".byte" *> ws *> nat >>| fun n -> DB n);
         pglobl;
         pcfi;
         string "\t\t\t\t/* relocation table start */" *> return CFI;
@@ -309,13 +315,41 @@ include struct
     match Angstrom.parse_string ~consume:Consume.All p s with x -> x
 end
 
-let translate ppf filename =
+let translate ppf ~is_startup ~main filename =
   let lines =
     In_channel.with_open_text filename In_channel.input_all
     |> String.split_on_char '\n'
   in
 
   let printfn fmt = kasprintf (fun s -> fprintf ppf "%s\n%!" s) fmt in
+  (* predefined *)
+  if is_startup then ()
+  else (
+    printfn "default rel\n";
+    ());
+  printfn "extern caml_c_call";
+  printfn "extern caml_call_gc";
+  printfn "extern caml_system__frametable";
+  printfn "extern caml_ml_flush";
+  printfn "extern caml_ml_open_descriptor_out";
+  printfn "extern caml_ml_output";
+  printfn "extern caml_ml_output_char";
+  printfn "extern caml_format_int";
+  if is_startup then (
+    printfn "global  caml_curry2";
+    printfn "global  caml_curry2_1";
+    printfn "extern caml_globals_inited";
+    printfn "extern caml%s__entry" main;
+    printfn "extern caml%s__data_begin" main;
+    printfn "extern caml%s__data_end" main;
+    printfn "extern caml%s__code_begin" main;
+    printfn "extern caml%s__code_end" main;
+    printfn "extern caml%s__gc_roots" main;
+    printfn "extern caml%s__frametable" main;
+    ())
+  else printfn "extern  caml_curry2";
+  printfn "";
+
   let rec loop lines =
     match lines with
     | "\t.file \"\"" :: tl -> loop tl
@@ -327,16 +361,20 @@ let translate ppf filename =
             exit 1
         | Ok x ->
             (match x with
-            | Section (".rodata.cst16" :: _) -> ()
+            | Section
+                [
+                  ".rodata.cst16"; ("\"aM\"" as flg); "@progbits"; ("16" as al);
+                ] ->
+                printfn "section .rodata %s progbits align=%s" flg al
             | Section [ ".note.GNU-stack"; "\"\""; "%progbits" ] ->
                 printfn "section .note.GNU-stack  progbits"
-            | Section (".data" :: []) -> printfn "SECTION DATA ; ???"
-            | Section (".text" :: []) -> printfn "SECTION TEXT ; ???"
+            | Section (".data" :: []) -> printfn "SECTION .data"
+            | Section (".text" :: []) -> printfn "SECTION .text"
             | Type _ -> printfn "  ; %a" pp x
             | Size -> ()
             | CFI -> ()
             | Ret -> printfn "\tret"
-            | Global s -> printfn "%s: ; Global was here" s
+            | Global s -> printfn "GLOBAL %s:function" s
             | Binop (ADD, AConst n, ADeref rd) ->
                 printfn "\tadd qword [%a], %d" pp_reg rd n
             | Binop (ADD, AConst n, AReg rd) ->
@@ -348,7 +386,9 @@ let translate ppf filename =
             | Binop (IMUL, AReg rs, AReg rd) ->
                 printfn "\timul %a, %a" pp_reg rd pp_reg rs
             | Binop (MOV, ALab_pcrel lab, AReg rd) ->
-                printfn "\tmov %a, [rel %s wrt ..got]" pp_reg rd lab
+                printfn "\tmov %a, qword [%s %s wrt ..got]" pp_reg rd
+                  (match lab with "caml_curry2_1" -> "" | _ -> "rel")
+                  lab
             | Binop (MOV, AConst n, AReg rd) ->
                 printfn "\tmov %a, %d" pp_reg rd n
             | Binop (MOV, AReg_off1 (n, r1), AReg rd) ->
@@ -362,7 +402,7 @@ let translate ppf filename =
             | Binop (MOV, AReg rs, AReg rd) ->
                 printfn "\tmov %a, %a" pp_reg rd pp_reg rs
             | Binop (MOV, AConst n, AReg_off1 (off, rd)) ->
-                printfn "\tmov [%a+%d], %d" pp_reg rd off n
+                printfn "\tmov qword [%a%+d], %d" pp_reg rd off n
             | Binop (SHR, AConst n, AReg rd) ->
                 printfn "\tshr %a, %d" pp_reg rd n
             | Binop (SHR, AConst n, AReg_off1 (off, rd)) ->
@@ -383,7 +423,7 @@ let translate ppf filename =
                 printfn "\tmovzx %a, byte [%a+%a]" pp_reg rd pp_reg rs1 pp_reg
                   rs2
             | Binop (MOVABS, AConst n, AReg rd) ->
-                printfn "\tmovabs %a, %d" pp_reg rd n
+                printfn "\tmov %a, %d" pp_reg rd n
             | Inc rd -> printfn "\tinc %a" pp_reg rd
             | Dec rd -> printfn "\tdec %a" pp_reg rd
             | Call s -> printfn "\tcall %s" s
@@ -405,7 +445,7 @@ let translate ppf filename =
             | Jbe s -> printfn "\tjbe %s" s
             | Jle s -> printfn "\tjle %s" s
             | Jne s -> printfn "\tjne %s" s
-            | Jmp s -> printfn "\tjmp %s ; TOOD: bad label?" s
+            | Jmp s -> printfn "\tjmp %s" s
             | Jmp_reg rd -> printfn "\tjmp %a" pp_reg rd
             | Call_reg rd -> printfn "\tcall %a" pp_reg rd
             | Ascii s -> printfn "\tdb \"%s\"" s

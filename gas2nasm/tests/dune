@@ -24,7 +24,7 @@
  (mode
   (promote (until-clean)))
  (action
-  (run ../gas2nasm.exe %{deps} -o %{targets})))
+  (run ../gas2nasm.exe -startup -main Tuple1 %{deps} -o %{targets})))
 
 (rule
  (deps tuple1.s)
