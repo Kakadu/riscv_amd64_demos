@@ -1,22 +1,25 @@
 (rule
  (deps tuple1.ml)
- (targets tuple1.s tuple1.o tuple1.exe.startup.s)
+ (targets tuple1.s tuple1.o tuple1.exe.startup.s tuple1.exe)
  (mode
   (promote (until-clean)))
  (action
-  (run
-   ocamlopt
-   -dstartup
-   -S
-   %{deps}
-   -nopervasives
-   -verbose
-   -o
-   tuple1.exe
-   -ccopt
-   -lasmrun
-   -ccopt
-   -lm)))
+  (progn
+   (run
+    ocamlopt
+    -dstartup
+    -S
+    %{deps}
+    -nopervasives
+    -verbose
+    -o
+    tuple1.exe
+    -ccopt
+    -lasmrun
+    -ccopt
+    -lm)
+   ;   (run ls)
+   )))
 
 (rule
  (deps tuple1.exe.startup.s)

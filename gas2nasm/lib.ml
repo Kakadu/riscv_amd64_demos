@@ -14,7 +14,7 @@ include struct
     | Star_rdx
     | AReg of reg
     | AReg_off1 of int * reg
-    | AReg_off2 of int * reg * int
+    | AReg_off2 of int * reg * int  (** [(offset, reg, multiplier)]*)
     | AReg_off3 of int option * reg * reg  (** [(%rbx,%rdi)], [1(%rdi,%rdi)]  *)
     | ADeref of reg
     | AConst of int
@@ -212,16 +212,19 @@ include struct
          [
            (label_ident <* string "@GOTPCREL(%rip)" >>| fun s -> ALab_pcrel s);
            (preg >>| fun r -> AReg r);
+           (* (%rax) *)
            (char '(' *> preg <* char ')' >>| fun r -> ADeref r);
+           (* 6(%rax) *)
            return (fun n r -> AReg_off1 (n, r))
            <*> nat
            <*> (char '(' *> preg <* char ')');
            string "*%rdx" *> return Star_rdx;
+           (* -8(%rbx) *)
            return (fun n r -> AReg_off1 (-n, r))
-           <*> char '-' *> any_uint8
+           <*> char '-' *> nat
            <*> (char '(' *> preg <* char ')');
            return (fun n (l, r) -> AReg_off2 (-n, l, r))
-           <*> char '-' *> any_uint8
+           <*> char '-' *> nat
            <*> (char '('
                 *> conde
                      [
@@ -416,7 +419,7 @@ let translate ppf ~is_startup ~main filename =
             | Binop (LEA, AReg_off1 (n, rs), AReg rd) ->
                 printfn "\tlea %a, [%a%+d]" pp_reg rd pp_reg rs n
             | Binop (LEA, AReg_off2 (n, rs, m), AReg rd) ->
-                printfn "\tlea %a, [%a%+d%+d]" pp_reg rd pp_reg rs n m
+                printfn "\tlea %a, [%a*%d%+d]" pp_reg rd pp_reg rs m n
             | Binop (LEA, AReg_off3 (Some n, rs1, rs2), AReg rd) ->
                 printfn "\tlea %a, [%a+%a%+d]" pp_reg rd pp_reg rs1 pp_reg rs2 n
             | Binop (MOVZB, AReg_off3 (None, rs1, rs2), AReg rd) ->
