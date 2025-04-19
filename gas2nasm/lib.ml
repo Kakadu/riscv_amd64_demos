@@ -55,8 +55,9 @@ include struct
     | DQ_int of int
     | Binop of op * arg * arg
     | Jb of string
-    | Jbe of string
+    | Jbe of string  (** Jump if below or equal (unsigned) *)
     | Jle of string
+    | Jge of string  (** Jump if greater or equal (signed) *)
     | Jne of string
     | Jmp of string
     | Jmp_reg of reg
@@ -124,7 +125,7 @@ include struct
     | 'a' .. 'z' | 'A' .. 'Z' | '_' | '0' .. '9' -> true
     | _ -> false
 
-  let is_label_char = function '.' | '_' -> true | x -> is_ident_char x
+  let is_label_char = function '$' | '.' | '_' -> true | x -> is_ident_char x
 
   let label_ident =
     let* lab = string_cond is_label_char in
@@ -173,7 +174,7 @@ include struct
     return Size
 
   let pglobl =
-    ws *> string ".globl" *> ws *> string_cond is_ident_char >>| fun s ->
+    ws *> string ".globl" *> ws *> string_cond is_label_char >>| fun s ->
     Global s
 
   let pcfi =
@@ -191,11 +192,13 @@ include struct
     conde
       [
         string "%" *> string "rsp" >>= mkr;
+        string "%" *> string "r8" >>= mkr;
         string "%" *> string "r14" >>= mkr;
         string "%" *> string "r15" >>= mkr;
         string "%" *> string "rax" >>= mkr;
         string "%" *> string "eax" >>= mkr;
         string "%" *> string "rbx" >>= mkr;
+        string "%" *> string "ebx" >>= mkr;
         string "%" *> string "rcx" >>= mkr;
         string "%" *> string "rdx" >>= mkr;
         string "%" *> string "edx" >>= mkr;
@@ -242,7 +245,10 @@ include struct
                  ]
            <*> (char '(' *> preg <* char ',')
            <*> (preg <* char ')');
+           (* $2 *)
            (char '$' *> nat >>| fun r -> AConst r);
+           (* $-2 *)
+           (string "$-" *> nat >>| fun r -> AConst (-r));
            fail "parg";
          ]
 
@@ -279,6 +285,7 @@ include struct
            (ws *> string "jbe" *> ws *> label_ident >>| fun s -> Jbe s);
            (ws *> string "jb" *> ws *> label_ident >>| fun s -> Jb s);
            (ws *> string "jle" *> ws *> label_ident >>| fun s -> Jle s);
+           (ws *> string "jge" *> ws *> label_ident >>| fun s -> Jge s);
            (ws *> string "jne" *> ws *> label_ident >>| fun s -> Jne s);
            ( ws *> string "jmp" *> ws *> label_ident <* string "@PLT"
            >>| fun s -> Jmp s );
@@ -319,6 +326,8 @@ include struct
 end
 
 let translate ppf ~is_startup ~main filename =
+  Format.pp_set_margin ppf 1000;
+  Format.pp_set_max_indent ppf 990;
   let lines =
     In_channel.with_open_text filename In_channel.input_all
     |> String.split_on_char '\n'
@@ -339,8 +348,9 @@ let translate ppf ~is_startup ~main filename =
   printfn "extern caml_ml_output_char";
   printfn "extern caml_format_int";
   if is_startup then (
-    printfn "global  caml_curry2";
-    printfn "global  caml_curry2_1";
+    printfn "global caml_curry2";
+    printfn "global caml_curry2_1";
+    printfn "global caml_curry3";
     printfn "extern caml_globals_inited";
     printfn "extern caml%s__entry" main;
     printfn "extern caml%s__data_begin" main;
@@ -350,7 +360,9 @@ let translate ppf ~is_startup ~main filename =
     printfn "extern caml%s__gc_roots" main;
     printfn "extern caml%s__frametable" main;
     ())
-  else printfn "extern  caml_curry2";
+  else (
+    printfn "extern caml_curry2";
+    printfn "extern caml_curry3");
   printfn "";
 
   let rec loop lines =
@@ -364,16 +376,17 @@ let translate ppf ~is_startup ~main filename =
             exit 1
         | Ok x ->
             (match x with
-            | Section
-                [
-                  ".rodata.cst16"; ("\"aM\"" as flg); "@progbits"; ("16" as al);
-                ] ->
-                printfn "section .rodata %s progbits align=%s" flg al
+            | Section [ ".rodata.cst16"; "\"aM\""; "@progbits"; ("16" as al) ]
+              ->
+                printfn
+                  "section .rodata progbits align=%s; also \
+                   allocateable-mergeable flags"
+                  al
             | Section [ ".note.GNU-stack"; "\"\""; "%progbits" ] ->
                 printfn "section .note.GNU-stack  progbits"
             | Section (".data" :: []) -> printfn "SECTION .data"
             | Section (".text" :: []) -> printfn "SECTION .text"
-            | Type _ -> printfn "  ; %a" pp x
+            | Type [ lab; info ] -> printfn "@[<h>; %s: %s@]" lab info
             | Size -> ()
             | CFI -> ()
             | Ret -> printfn "\tret"
@@ -388,9 +401,36 @@ let translate ppf ~is_startup ~main filename =
                 printfn "\tsub %a, %a" pp_reg rd pp_reg rs
             | Binop (IMUL, AReg rs, AReg rd) ->
                 printfn "\timul %a, %a" pp_reg rd pp_reg rs
+            (* | Binop
+                ( MOV,
+                  ALab_pcrel
+                    "camlFack__anon_fn$5bFack$2eml$3a32$2c53$2d$2d73$5d_79",
+                  AReg rd ) ->
+                printfn
+                  "\tmov %a, [ \
+                   camlFack__anon_fn$5bFack$2eml$3a32$2c53$2d$2d73$5d_79]"
+                  pp_reg rd *)
             | Binop (MOV, ALab_pcrel lab, AReg rd) ->
-                printfn "\tmov %a, qword [%s %s wrt ..got]" pp_reg rd
-                  (match lab with "caml_curry2_1" -> "" | _ -> "rel")
+                (* printfn "%%comment"; *)
+                pp_set_margin ppf 1000000;
+                pp_set_max_indent ppf 1000;
+
+                (* printfn ";@[<h> %a@]" pp x; *)
+                (* printfn "; main = %s" main; *)
+
+                (* printfn "%%endcomment"; *)
+                printfn "\tmov %a, qword [%s %s wrt ..got] ; ??" pp_reg rd
+                  (match lab with
+                  (* | "camlFack__k0_143"  *)
+                  | "caml_curry2_1" | "caml_curry3_1_app" | "caml_curry3_1"
+                  | "caml_curry3_2" ->
+                      ""
+                  | _
+                    when String.starts_with
+                           ~prefix:(sprintf "caml%s__anon_fn" main)
+                           lab ->
+                      ""
+                  | _ -> "rel")
                   lab
             | Binop (MOV, AConst n, AReg rd) ->
                 printfn "\tmov %a, %d" pp_reg rd n
@@ -426,7 +466,7 @@ let translate ppf ~is_startup ~main filename =
                 printfn "\tmovzx %a, byte [%a+%a]" pp_reg rd pp_reg rs1 pp_reg
                   rs2
             | Binop (MOVABS, AConst n, AReg rd) ->
-                printfn "\tmov %a, %d" pp_reg rd n
+                printfn "\tmov %a, 0x%X" pp_reg rd n
             | Inc rd -> printfn "\tinc %a" pp_reg rd
             | Dec rd -> printfn "\tdec %a" pp_reg rd
             | Call s -> printfn "\tcall %s" s
@@ -437,24 +477,24 @@ let translate ppf ~is_startup ~main filename =
             | DQ_hex s -> printfn "\tdq 0x%s" s
             | DW_int n -> printfn "\tdw %d" n
             | DB n -> printfn "\tdb %d" n
-            | DL (str, 0) ->
+            | DL (_str, 0) ->
                 (* printfn "\t;dl ($ - %s)" str *)
                 ()
             | DL (str, n) ->
-                (* printfn "\t;dl (%s - $) + %d" str n *)
+                printfn "\t;dl (%s - $) + %d" str n;
                 ()
             | DL2 n -> printfn "\t;dl %d" n
             | Jb s -> printfn "\tjb %s" s
             | Jbe s -> printfn "\tjbe %s" s
             | Jle s -> printfn "\tjle %s" s
+            | Jge s -> printfn "\tjge %s" s
             | Jne s -> printfn "\tjne %s" s
             | Jmp s -> printfn "\tjmp %s" s
             | Jmp_reg rd -> printfn "\tjmp %a" pp_reg rd
             | Call_reg rd -> printfn "\tcall %a" pp_reg rd
             | Ascii s -> printfn "\tdb \"%s\"" s
             | Space n -> printfn "\ttimes %d db 0" n
-            (* | (Jbe _ | Binop _ | Jmp _) as b -> printfn "  ; %a" pp b *)
-            | b ->
+            | _ ->
                 (* printfn "  ; %a" pp b *)
                 eprintf "%a\n%!" pp x;
                 let _ = failwith "not implemented" in

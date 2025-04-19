@@ -1,0 +1,192 @@
+(rule
+ (deps Tuple1.ml)
+ (targets Tuple1.s Tuple1.o Tuple1.exe.startup.s Tuple1.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   Tuple1.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps Tuple1.exe.startup.s)
+ (targets Tuple1.startup.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -startup -main Tuple1 %{deps} -o %{targets})))
+
+(rule
+ (deps Tuple1.s)
+ (targets Tuple1.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -main Tuple1 %{deps} -o %{targets})))
+
+
+(rule
+ (deps Tuple1.startup.nasm.s)
+ (targets Tuple1_nasm_startup.o)
+ ; (mode
+ ;  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Tuple1.nasm.s)
+ (targets Tuple1.nasm.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Tuple1_nasm_startup.o Tuple1.nasm.o)
+ (targets Tuple1_nasm.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+(cram
+ (deps Tuple1_nasm.exe))
+
+(rule
+ (deps Facacc.ml)
+ (targets Facacc.s Facacc.o Facacc.exe.startup.s Facacc.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   Facacc.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps Facacc.exe.startup.s)
+ (targets Facacc.startup.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -startup -main Facacc %{deps} -o %{targets})))
+
+(rule
+ (deps Facacc.s)
+ (targets Facacc.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -main Facacc %{deps} -o %{targets})))
+
+
+(rule
+ (deps Facacc.startup.nasm.s)
+ (targets Facacc_nasm_startup.o)
+ ; (mode
+ ;  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Facacc.nasm.s)
+ (targets Facacc.nasm.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Facacc_nasm_startup.o Facacc.nasm.o)
+ (targets Facacc_nasm.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+(cram
+ (deps Facacc_nasm.exe))
+
+(rule
+ (deps Fack.ml)
+ (targets Fack.s Fack.o Fack.exe.startup.s Fack.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   Fack.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps Fack.exe.startup.s)
+ (targets Fack.startup.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -startup -main Fack %{deps} -o %{targets})))
+
+(rule
+ (deps Fack.s)
+ (targets Fack.nasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -main Fack %{deps} -o %{targets})))
+
+
+(rule
+ (deps Fack.startup.nasm.s)
+ (targets Fack_nasm_startup.o)
+ ; (mode
+ ;  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Fack.nasm.s)
+ (targets Fack.nasm.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Fack_nasm_startup.o Fack.nasm.o)
+ (targets Fack_nasm.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+(cram
+ (deps Fack_nasm.exe))
+

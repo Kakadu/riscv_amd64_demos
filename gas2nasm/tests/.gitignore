@@ -1,3 +1,5 @@
 *.gas.txt
 *.nasm.txt
 /gdb.txt
+*.exe.startup.s
+*.nasm.s

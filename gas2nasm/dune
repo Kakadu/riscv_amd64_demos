@@ -27,4 +27,13 @@
   (pps ppx_inline_test_nobase ppx_expect_nobase)))
 
 (cram
- (deps ./gas2nasm.exe tests/tuple1_nasm.exe tests/tuple1.exe))
+ (applies_to tuple1)
+ (deps tests/Tuple1_nasm.exe tests/Tuple1.exe))
+
+(cram
+ (applies_to Facacc)
+ (deps tests/Facacc_nasm.exe tests/Facacc.exe))
+
+(cram
+ (applies_to Fack)
+ (deps tests/Fack_nasm.exe tests/Fack.exe))
