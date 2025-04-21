@@ -2,4 +2,7 @@
 *.nasm.txt
 /gdb.txt
 *.exe.startup.s
-*.nasm.s
+*.yasm.s
+/Facacc.s
+/Fack.s
+/Tuple1.s

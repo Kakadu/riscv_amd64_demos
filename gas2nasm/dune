@@ -28,12 +28,12 @@
 
 (cram
  (applies_to tuple1)
- (deps tests/Tuple1_nasm.exe tests/Tuple1.exe))
+ (deps tests/Tuple1_yasm.exe tests/Tuple1.exe))
 
 (cram
  (applies_to Facacc)
- (deps tests/Facacc_nasm.exe tests/Facacc.exe))
+ (deps tests/Facacc_yasm.exe tests/Facacc.exe))
 
 (cram
  (applies_to Fack)
- (deps tests/Fack_nasm.exe tests/Fack.exe))
+ (deps tests/Fack_yasm.exe tests/Fack.exe))

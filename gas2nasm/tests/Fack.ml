@@ -35,4 +35,4 @@ let rec fac n k =
   (* output_string stdout "inside fac\n"; *)
   if n < 2 then k 1 else fac (n - 1) (k0 k n)
 
-let () = print_endline (string_of_int (fac 5 id))
+let () = print_endline (string_of_int (fac 6 id))

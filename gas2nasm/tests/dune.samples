@@ -20,7 +20,7 @@
 
 (rule
  (deps Tuple1.exe.startup.s)
- (targets Tuple1.startup.nasm.s)
+ (targets Tuple1.startup.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -28,7 +28,7 @@
 
 (rule
  (deps Tuple1.s)
- (targets Tuple1.nasm.s)
+ (targets Tuple1.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -36,31 +36,31 @@
 
 
 (rule
- (deps Tuple1.startup.nasm.s)
- (targets Tuple1_nasm_startup.o)
+ (deps Tuple1.startup.yasm.s)
+ (targets Tuple1_yasm_startup.o)
  ; (mode
  ;  (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Tuple1.nasm.s)
- (targets Tuple1.nasm.o)
+ (deps Tuple1.yasm.s)
+ (targets Tuple1.yasm.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Tuple1_nasm_startup.o Tuple1.nasm.o)
- (targets Tuple1_nasm.exe)
+ (deps Tuple1_yasm_startup.o Tuple1.yasm.o)
+ (targets Tuple1_yasm.exe)
  (mode
   (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
 (cram
- (deps Tuple1_nasm.exe))
+ (deps Tuple1_yasm.exe))
 
 (rule
  (deps Facacc.ml)
@@ -84,7 +84,7 @@
 
 (rule
  (deps Facacc.exe.startup.s)
- (targets Facacc.startup.nasm.s)
+ (targets Facacc.startup.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -92,7 +92,7 @@
 
 (rule
  (deps Facacc.s)
- (targets Facacc.nasm.s)
+ (targets Facacc.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -100,31 +100,31 @@
 
 
 (rule
- (deps Facacc.startup.nasm.s)
- (targets Facacc_nasm_startup.o)
+ (deps Facacc.startup.yasm.s)
+ (targets Facacc_yasm_startup.o)
  ; (mode
  ;  (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Facacc.nasm.s)
- (targets Facacc.nasm.o)
+ (deps Facacc.yasm.s)
+ (targets Facacc.yasm.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Facacc_nasm_startup.o Facacc.nasm.o)
- (targets Facacc_nasm.exe)
+ (deps Facacc_yasm_startup.o Facacc.yasm.o)
+ (targets Facacc_yasm.exe)
  (mode
   (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
 (cram
- (deps Facacc_nasm.exe))
+ (deps Facacc_yasm.exe))
 
 (rule
  (deps Fack.ml)
@@ -148,7 +148,7 @@
 
 (rule
  (deps Fack.exe.startup.s)
- (targets Fack.startup.nasm.s)
+ (targets Fack.startup.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -156,7 +156,7 @@
 
 (rule
  (deps Fack.s)
- (targets Fack.nasm.s)
+ (targets Fack.yasm.s)
  (mode
   (promote (until-clean)))
  (action
@@ -164,29 +164,29 @@
 
 
 (rule
- (deps Fack.startup.nasm.s)
- (targets Fack_nasm_startup.o)
+ (deps Fack.startup.yasm.s)
+ (targets Fack_yasm_startup.o)
  ; (mode
  ;  (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Fack.nasm.s)
- (targets Fack.nasm.o)
+ (deps Fack.yasm.s)
+ (targets Fack.yasm.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps Fack_nasm_startup.o Fack.nasm.o)
- (targets Fack_nasm.exe)
+ (deps Fack_yasm_startup.o Fack.yasm.o)
+ (targets Fack_yasm.exe)
  (mode
   (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
 (cram
- (deps Fack_nasm.exe))
+ (deps Fack_yasm.exe))
 

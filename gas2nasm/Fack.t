@@ -1,4 +1,4 @@
   $ tests/Fack.exe
-  1
-  $ tests/Fack_nasm.exe
-  2
+  720
+  $ tests/Fack_yasm.exe
+  720

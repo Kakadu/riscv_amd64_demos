@@ -30,49 +30,49 @@ module C = struct
   let make_convert =
     {|(rule
  (deps MAIN.exe.startup.s)
- (targets MAIN.startup.nasm.s)
+ (targets MAIN.startup.yasm.s)
  (mode
   (promote (until-clean)))
  (action
-  (run ../gas2nasm.exe -startup -main MAIN %{deps} -o %{targets})))
+  (run ../gas2yasm.exe -startup -main MAIN %{deps} -o %{targets})))
 
 (rule
  (deps MAIN.s)
- (targets MAIN.nasm.s)
+ (targets MAIN.yasm.s)
  (mode
   (promote (until-clean)))
  (action
-  (run ../gas2nasm.exe -main MAIN %{deps} -o %{targets})))
+  (run ../gas2yasm.exe -main MAIN %{deps} -o %{targets})))
 |}
 
-  let make_nasm_exe =
+  let make_yasm_exe =
     {|
 (rule
- (deps MAIN.startup.nasm.s)
- (targets MAIN_nasm_startup.o)
+ (deps MAIN.startup.yasm.s)
+ (targets MAIN_yasm_startup.o)
  ; (mode
  ;  (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps MAIN.nasm.s)
- (targets MAIN.nasm.o)
+ (deps MAIN.yasm.s)
+ (targets MAIN.yasm.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
 
 (rule
- (deps MAIN_nasm_startup.o MAIN.nasm.o)
- (targets MAIN_nasm.exe)
+ (deps MAIN_yasm_startup.o MAIN.yasm.o)
+ (targets MAIN_yasm.exe)
  (mode
   (promote (until-clean)))
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
 (cram
- (deps MAIN_nasm.exe))
+ (deps MAIN_yasm.exe))
 |}
 end
 
@@ -82,7 +82,7 @@ let on_sample ppf name =
   Format.fprintf ppf "%s\n"
     (Str.global_replace (Str.regexp "MAIN") name C.make_convert);
   Format.fprintf ppf "%s\n"
-    (Str.global_replace (Str.regexp "MAIN") name C.make_nasm_exe);
+    (Str.global_replace (Str.regexp "MAIN") name C.make_yasm_exe);
   ()
 
 let () =
