@@ -384,9 +384,15 @@ let translate ppf ~is_startup ~main filename =
                   al
             | Section [ ".note.GNU-stack"; "\"\""; "%progbits" ] ->
                 printfn "section .note.GNU-stack  progbits"
-            | Section (".data" :: []) -> printfn "SECTION .data"
-            | Section (".text" :: []) -> printfn "SECTION .text"
-            | Type [ lab; info ] -> printfn "@[<h>; %s: %s@]" lab info
+            | Section (".data" :: []) -> printfn "section .data"
+            | Section (".text" :: []) ->
+                printfn "";
+                printfn "section .text"
+            | Type [ lab; "@function" ] ->
+                (* printfn "@[<h>; %s: %s@]" lab info *)
+                printfn "type %s function" lab
+            | Align n -> printfn "align %d" n
+            | Label s -> printfn "%s:" s
             | Size -> ()
             | CFI -> ()
             | Ret -> printfn "\tret"
@@ -401,37 +407,8 @@ let translate ppf ~is_startup ~main filename =
                 printfn "\tsub %a, %a" pp_reg rd pp_reg rs
             | Binop (IMUL, AReg rs, AReg rd) ->
                 printfn "\timul %a, %a" pp_reg rd pp_reg rs
-            (* | Binop
-                ( MOV,
-                  ALab_pcrel
-                    "camlFack__anon_fn$5bFack$2eml$3a32$2c53$2d$2d73$5d_79",
-                  AReg rd ) ->
-                printfn
-                  "\tmov %a, [ \
-                   camlFack__anon_fn$5bFack$2eml$3a32$2c53$2d$2d73$5d_79]"
-                  pp_reg rd *)
             | Binop (MOV, ALab_pcrel lab, AReg rd) ->
-                (* printfn "%%comment"; *)
-                pp_set_margin ppf 1000000;
-                pp_set_max_indent ppf 1000;
-
-                (* printfn ";@[<h> %a@]" pp x; *)
-                (* printfn "; main = %s" main; *)
-
-                (* printfn "%%endcomment"; *)
-                printfn "\tmov %a, qword [%s %s wrt ..got] ; ??" pp_reg rd
-                  (match lab with
-                  (* | "camlFack__k0_143"  *)
-                  | "caml_curry2_1" | "caml_curry3_1_app" | "caml_curry3_1"
-                  | "caml_curry3_2" ->
-                      ""
-                  | _
-                    when String.starts_with
-                           ~prefix:(sprintf "caml%s__anon_fn" main)
-                           lab ->
-                      ""
-                  | _ -> "rel")
-                  lab
+                printfn "\tmov %a, qword [%s %s wrt ..got]" pp_reg rd "rel" lab
             | Binop (MOV, AConst n, AReg rd) ->
                 printfn "\tmov %a, %d" pp_reg rd n
             | Binop (MOV, AReg_off1 (n, r1), AReg rd) ->
@@ -470,19 +447,13 @@ let translate ppf ~is_startup ~main filename =
             | Inc rd -> printfn "\tinc %a" pp_reg rd
             | Dec rd -> printfn "\tdec %a" pp_reg rd
             | Call s -> printfn "\tcall %s" s
-            | Align n -> printfn "ALIGN %d" n
-            | Label s -> printfn "%s:" s
             | DQ s -> printfn "\tdq %s" s
             | DQ_int n -> printfn "\tdq %d" n
             | DQ_hex s -> printfn "\tdq 0x%s" s
             | DW_int n -> printfn "\tdw %d" n
             | DB n -> printfn "\tdb %d" n
-            | DL (_str, 0) ->
-                (* printfn "\t;dl ($ - %s)" str *)
-                ()
-            | DL (str, n) ->
-                printfn "\t;dl (%s - $) + %d" str n;
-                ()
+            | DL (str, 0) -> printfn "\tdd ($ - %s)" str
+            | DL (str, n) -> printfn "\tdd (%s - $) + %d" str n
             | DL2 n -> printfn "\t;dl %d" n
             | Jb s -> printfn "\tjb %s" s
             | Jbe s -> printfn "\tjbe %s" s

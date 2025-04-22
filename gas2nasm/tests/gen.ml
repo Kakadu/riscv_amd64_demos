@@ -2,7 +2,7 @@
 #use "topfind";;
 #require "str";;
 
-let samples = [ "Tuple1"; "Facacc"; "Fack" ]
+let samples = [ "Tuple1"; "Facacc"; "Fack"; "Fibk" ]
 
 module C = struct
   let make_gas =
@@ -34,7 +34,7 @@ module C = struct
  (mode
   (promote (until-clean)))
  (action
-  (run ../gas2yasm.exe -startup -main MAIN %{deps} -o %{targets})))
+  (run ../gas2nasm.exe -startup -main MAIN %{deps} -o %{targets})))
 
 (rule
  (deps MAIN.s)
@@ -42,7 +42,7 @@ module C = struct
  (mode
   (promote (until-clean)))
  (action
-  (run ../gas2yasm.exe -main MAIN %{deps} -o %{targets})))
+  (run ../gas2nasm.exe -main MAIN %{deps} -o %{targets})))
 |}
 
   let make_yasm_exe =
@@ -53,7 +53,7 @@ module C = struct
  ; (mode
  ;  (promote (until-clean)))
  (action
-  (run yasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
  (deps MAIN.yasm.s)
@@ -61,7 +61,7 @@ module C = struct
  (mode
   (promote (until-clean)))
  (action
-  (run yasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
 
 (rule
  (deps MAIN_yasm_startup.o MAIN.yasm.o)

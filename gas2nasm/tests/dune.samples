@@ -190,3 +190,67 @@
 (cram
  (deps Fack_yasm.exe))
 
+(rule
+ (deps Fibk.ml)
+ (targets Fibk.s Fibk.o Fibk.exe.startup.s Fibk.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   ocamlopt
+   -dstartup
+   -S
+   %{deps}
+   -nopervasives
+   -verbose
+   -o
+   Fibk.exe
+   -ccopt
+   -lasmrun
+   -ccopt
+   -lm)))
+
+(rule
+ (deps Fibk.exe.startup.s)
+ (targets Fibk.startup.yasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -startup -main Fibk %{deps} -o %{targets})))
+
+(rule
+ (deps Fibk.s)
+ (targets Fibk.yasm.s)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run ../gas2nasm.exe -main Fibk %{deps} -o %{targets})))
+
+
+(rule
+ (deps Fibk.startup.yasm.s)
+ (targets Fibk_yasm_startup.o)
+ ; (mode
+ ;  (promote (until-clean)))
+ (action
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Fibk.yasm.s)
+ (targets Fibk.yasm.o)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
+
+(rule
+ (deps Fibk_yasm_startup.o Fibk.yasm.o)
+ (targets Fibk_yasm.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+(cram
+ (deps Fibk_yasm.exe))
+

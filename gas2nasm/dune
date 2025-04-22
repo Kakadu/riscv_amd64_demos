@@ -37,3 +37,7 @@
 (cram
  (applies_to Fack)
  (deps tests/Fack_yasm.exe tests/Fack.exe))
+
+(cram
+ (applies_to Fibk)
+ (deps tests/Fibk_yasm.exe tests/Fibk.exe))
