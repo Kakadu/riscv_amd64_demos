@@ -15,7 +15,7 @@ include struct
     | AReg of reg
     | AReg_off1 of int * reg
     | AReg_off2 of int * reg * int  (** [(offset, reg, multiplier)]*)
-    | AReg_off3 of int option * reg * reg  (** [(%rbx,%rdi)], [1(%rdi,%rdi)]  *)
+    | AReg_off3 of int option * reg * reg  (** [(%rbx,%rdi)], [1(%rdi,%rdi)] *)
     | ADeref of reg
     | AConst of int
     | ALab_pcrel of string
@@ -65,6 +65,8 @@ include struct
     | Dec of reg
     | Call of string
     | Call_reg of reg
+    | Push of arg
+    | Pop of arg
     | Ret
   [@@deriving show { with_path = false }]
 
@@ -159,7 +161,7 @@ include struct
 
   let ptype =
     ws *> string ".type" *> ws
-    *> sep_by1 (char ',') (conde [ string "@function"; label_ident ])
+    *> sep_by1 (char ',') (conde [ string "@function";  string "@object"; string "caml_startup.frametable"; label_ident ])
     >>| fun xs -> Type xs
 
   let pspace = ws *> string ".space" *> ws *> nat >>| fun n -> Space n
@@ -177,15 +179,7 @@ include struct
     ws *> string ".globl" *> ws *> string_cond is_label_char >>| fun s ->
     Global s
 
-  let pcfi =
-    conde
-      [
-        (ws *> string ".cfi_startproc" >>| fun _ -> CFI);
-        (ws *> string ".cfi_endproc" >>| fun _ -> CFI);
-        (ws *> string ".cfi_adjust_cfa_offset" *> ws *> nat >>| fun _ -> CFI);
-        ( ws *> string ".cfi_adjust_cfa_offset" *> ws *> char '-' *> nat
-        >>| fun _ -> CFI );
-      ]
+
 
   let preg =
     let mkr s = return (R s) in
@@ -193,6 +187,7 @@ include struct
       [
         string "%" *> string "rsp" >>= mkr;
         string "%" *> string "r8" >>= mkr;
+        string "%" *> string "r10" >>= mkr;
         string "%" *> string "r14" >>= mkr;
         string "%" *> string "r15" >>= mkr;
         string "%" *> string "rax" >>= mkr;
@@ -208,7 +203,18 @@ include struct
         string "%" *> string "esi" >>= mkr;
         fail "preg";
       ]
-
+  let pcfi =
+    conde
+      [
+        (ws *> string ".cfi_startproc" >>| fun _ -> CFI);
+        (ws *> string ".cfi_endproc" >>| fun _ -> CFI);
+        (ws *> string ".cfi_remember_state" >>| fun _ -> CFI);
+        (ws *> string ".cfi_restore_state" >>| fun _ -> CFI);
+        (ws *> string ".cfi_adjust_cfa_offset" *> ws *> nat >>| fun _ -> CFI);
+        (ws *> string ".cfi_def_cfa_register" *> ws *> preg >>| fun _ -> CFI);
+        ( ws *> string ".cfi_adjust_cfa_offset" *> ws *> char '-' *> nat
+        >>| fun _ -> CFI );
+      ]
   let parg =
     ws
     *> conde
@@ -282,6 +288,8 @@ include struct
            binin;
            (ws *> string "decq" *> ws *> preg >>| fun r -> Dec r);
            (ws *> string "incq" *> ws *> preg >>| fun r -> Inc r);
+           (ws *> string "push" *> ws *> parg >>| fun r -> Push r);
+           (ws *> string "popq" *> ws *> parg >>| fun r -> Pop r);
            (ws *> string "jbe" *> ws *> label_ident >>| fun s -> Jbe s);
            (ws *> string "jb" *> ws *> label_ident >>| fun s -> Jb s);
            (ws *> string "jle" *> ws *> label_ident >>| fun s -> Jle s);
@@ -433,6 +441,8 @@ let translate ppf ~is_startup ~main filename =
                 printfn "\tcmp %a, qword [%a]" pp_reg rd pp_reg rs
             | Binop (CMP, AConst n, AReg rd) ->
                 printfn "\tcmp %a, %d" pp_reg rd n
+            | Binop (CMP, AReg_off1 (n, rs), AReg rd) ->
+                printfn "\tcmp %a, [%a%+d]" pp_reg rd pp_reg rs n
             | Binop (LEA, AReg_off1 (n, rs), AReg rd) ->
                 printfn "\tlea %a, [%a%+d]" pp_reg rd pp_reg rs n
             | Binop (LEA, AReg_off2 (n, rs, m), AReg rd) ->
@@ -455,6 +465,8 @@ let translate ppf ~is_startup ~main filename =
             | DL (str, 0) -> printfn "\tdd ($ - %s)" str
             | DL (str, n) -> printfn "\tdd (%s - $) + %d" str n
             | DL2 n -> printfn "\t;dl %d" n
+            | Push (AConst n) -> printfn "\tpush %d" n
+            | Pop (AReg r) -> printfn "\tpop %a" pp_reg r
             | Jb s -> printfn "\tjb %s" s
             | Jbe s -> printfn "\tjbe %s" s
             | Jle s -> printfn "\tjle %s" s

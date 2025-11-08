@@ -1,7 +1,7 @@
 type cfg = { mutable mainname : string }
 
 let cfg = { mainname = "MAIN" }
-let out = ref "out.s"
+let out = ref "-"
 let input = ref ""
 let is_startup = ref false
 
