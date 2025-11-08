@@ -1,0 +1,8 @@
+(rule
+ (target risc_ocaml_lib.txt)
+ (mode
+  (promote (until-clean)))
+ (action
+  (with-stdout-to
+   %{target}
+   (run printf "/home/kakadu/asp/ocaml-cross/lib/ocaml"))))

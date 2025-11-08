@@ -3,3 +3,5 @@ a.out
 *.cm[ioxa]
 01work/gdb.txt
 
+/risc_ocaml_lib.txt
+
