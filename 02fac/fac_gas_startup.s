@@ -9,44 +9,52 @@ caml_absf_mask:
 	.quad	0x7fffffffffffffff
 	.quad	-1
 	.data
-	.globl	caml_startup__data_begin
-caml_startup__data_begin:
+	.globl	caml_startup.data_begin
+caml_startup.data_begin:
 	.text
-	.globl	caml_startup__code_begin
-caml_startup__code_begin:
+	.globl	caml_startup.code_begin
+caml_startup.code_begin:
 	.text
 	.align	16
 	.globl	caml_program
 caml_program:
 	.cfi_startproc
-	subq	$8, %rsp
-	.cfi_adjust_cfa_offset 8
-.L133:
-	call	camlFac__entry@PLT
-.L134:
+	leaq	-320(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L140
+.L141:
+.L139:
+	call	camlFac.entry@PLT
+.L142:
 	movq	caml_globals_inited@GOTPCREL(%rip), %rax
 	addq	$1, (%rax)
 	movl	$1, %eax
-	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	ret
+.L140:
+	push	$33
 	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
 	.cfi_adjust_cfa_offset -8
+	jmp	.L141
 	.cfi_endproc
 	.type caml_program,@function
 	.size caml_program,. - caml_program
+	.data
+	.align	8
+	.globl	caml_startup.gc_roots
+caml_startup.gc_roots:
+	.quad	0
 	.text
 	.align	16
 	.globl	caml_curry2
 caml_curry2:
 	.cfi_startproc
-	subq	$8, %rsp
-	.cfi_adjust_cfa_offset 8
-.L135:
+.L143:
 	subq	$40, %r15
 	cmpq	(%r14), %r15
-	jb	.L136
-.L138:
+	jb	.L144
+.L146:
 	leaq	8(%r15), %rdi
 	movq	$4343, -8(%rdi)
 	movq	caml_curry2_1@GOTPCREL(%rip), %rsi
@@ -56,15 +64,11 @@ caml_curry2:
 	movq	%rax, 16(%rdi)
 	movq	%rbx, 24(%rdi)
 	movq	%rdi, %rax
-	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	ret
-	.cfi_adjust_cfa_offset 8
-.L136:
+.L144:
 	call	caml_call_gc@PLT
-.L137:
-	jmp	.L138
-	.cfi_adjust_cfa_offset -8
+.L145:
+	jmp	.L146
 	.cfi_endproc
 	.type caml_curry2,@function
 	.size caml_curry2,. - caml_curry2
@@ -73,26 +77,20 @@ caml_curry2:
 	.globl	caml_curry2_1
 caml_curry2_1:
 	.cfi_startproc
-	subq	$8, %rsp
-	.cfi_adjust_cfa_offset 8
-.L139:
+.L147:
 	movq	%rax, %rsi
 	cmpq	(%r14), %r15
-	jbe	.L140
-.L141:
+	jbe	.L148
+.L149:
 	movq	24(%rbx), %rdi
 	movq	16(%rbx), %rax
 	movq	16(%rdi), %rdx
 	movq	%rsi, %rbx
-	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	jmp	*%rdx
-	.cfi_adjust_cfa_offset 8
-.L140:
+.L148:
 	call	caml_call_gc@PLT
-.L142:
-	jmp	.L141
-	.cfi_adjust_cfa_offset -8
+.L150:
+	jmp	.L149
 	.cfi_endproc
 	.type caml_curry2_1,@function
 	.size caml_curry2_1,. - caml_curry2_1
@@ -101,39 +99,50 @@ caml_curry2_1:
 	.globl	caml_apply3
 caml_apply3:
 	.cfi_startproc
-	subq	$24, %rsp
-	.cfi_adjust_cfa_offset 24
-.L144:
+	leaq	-336(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L153
+.L154:
+	subq	$16, %rsp
+	.cfi_adjust_cfa_offset 16
+.L152:
 	movq	8(%rsi), %rdx
 	sarq	$56, %rdx
 	cmpq	$3, %rdx
-	jne	.L143
+	jne	.L151
 	movq	16(%rsi), %rdx
-	addq	$24, %rsp
-	.cfi_adjust_cfa_offset -24
+	addq	$16, %rsp
+	.cfi_adjust_cfa_offset -16
 	jmp	*%rdx
-	.cfi_adjust_cfa_offset 24
+	.cfi_adjust_cfa_offset 16
 	.align	4
-.L143:
+.L151:
 	movq	%rdi, 8(%rsp)
 	movq	%rbx, (%rsp)
 	movq	(%rsi), %rdi
 	movq	%rsi, %rbx
 	call	*%rdi
-.L145:
+.L155:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	(%rsp), %rax
 	call	*%rdi
-.L146:
+.L156:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	8(%rsp), %rax
-	addq	$24, %rsp
-	.cfi_adjust_cfa_offset -24
+	addq	$16, %rsp
+	.cfi_adjust_cfa_offset -16
 	jmp	*%rdi
-	.cfi_adjust_cfa_offset 24
-	.cfi_adjust_cfa_offset -24
+	.cfi_adjust_cfa_offset 16
+.L153:
+	push	$35
+	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
+	.cfi_adjust_cfa_offset -8
+	jmp	.L154
+	.cfi_adjust_cfa_offset -16
 	.cfi_endproc
 	.type caml_apply3,@function
 	.size caml_apply3,. - caml_apply3
@@ -142,25 +151,29 @@ caml_apply3:
 	.globl	caml_apply2
 caml_apply2:
 	.cfi_startproc
+	leaq	-328(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L159
+.L160:
 	subq	$8, %rsp
 	.cfi_adjust_cfa_offset 8
-.L148:
+.L158:
 	movq	8(%rdi), %rsi
 	sarq	$56, %rsi
 	cmpq	$2, %rsi
-	jne	.L147
+	jne	.L157
 	movq	16(%rdi), %rsi
 	addq	$8, %rsp
 	.cfi_adjust_cfa_offset -8
 	jmp	*%rsi
 	.cfi_adjust_cfa_offset 8
 	.align	4
-.L147:
+.L157:
 	movq	%rbx, (%rsp)
 	movq	(%rdi), %rsi
 	movq	%rdi, %rbx
 	call	*%rsi
-.L149:
+.L161:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	(%rsp), %rax
@@ -168,6 +181,13 @@ caml_apply2:
 	.cfi_adjust_cfa_offset -8
 	jmp	*%rdi
 	.cfi_adjust_cfa_offset 8
+.L159:
+	push	$34
+	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
+	.cfi_adjust_cfa_offset -8
+	jmp	.L160
 	.cfi_adjust_cfa_offset -8
 	.cfi_endproc
 	.type caml_apply2,@function
@@ -177,10 +197,10 @@ caml_apply2:
 	.quad	3064
 	.globl	caml_exn_Out_of_memory
 caml_exn_Out_of_memory:
-	.quad	caml_startup__1
+	.quad	caml_startup.1
 	.quad	-1
 	.quad	3068
-caml_startup__1:
+caml_startup.1:
 	.ascii	"Out_of_memory"
 	.space	2
 	.byte	2
@@ -189,10 +209,10 @@ caml_startup__1:
 	.quad	3064
 	.globl	caml_exn_Sys_error
 caml_exn_Sys_error:
-	.quad	caml_startup__2
+	.quad	caml_startup.2
 	.quad	-3
 	.quad	3068
-caml_startup__2:
+caml_startup.2:
 	.ascii	"Sys_error"
 	.space	6
 	.byte	6
@@ -201,10 +221,10 @@ caml_startup__2:
 	.quad	3064
 	.globl	caml_exn_Failure
 caml_exn_Failure:
-	.quad	caml_startup__3
+	.quad	caml_startup.3
 	.quad	-5
 	.quad	2044
-caml_startup__3:
+caml_startup.3:
 	.ascii	"Failure"
 	.byte	0
 	.data
@@ -212,10 +232,10 @@ caml_startup__3:
 	.quad	3064
 	.globl	caml_exn_Invalid_argument
 caml_exn_Invalid_argument:
-	.quad	caml_startup__4
+	.quad	caml_startup.4
 	.quad	-7
 	.quad	4092
-caml_startup__4:
+caml_startup.4:
 	.ascii	"Invalid_argument"
 	.space	7
 	.byte	7
@@ -224,10 +244,10 @@ caml_startup__4:
 	.quad	3064
 	.globl	caml_exn_End_of_file
 caml_exn_End_of_file:
-	.quad	caml_startup__5
+	.quad	caml_startup.5
 	.quad	-9
 	.quad	3068
-caml_startup__5:
+caml_startup.5:
 	.ascii	"End_of_file"
 	.space	4
 	.byte	4
@@ -236,10 +256,10 @@ caml_startup__5:
 	.quad	3064
 	.globl	caml_exn_Division_by_zero
 caml_exn_Division_by_zero:
-	.quad	caml_startup__6
+	.quad	caml_startup.6
 	.quad	-11
 	.quad	4092
-caml_startup__6:
+caml_startup.6:
 	.ascii	"Division_by_zero"
 	.space	7
 	.byte	7
@@ -248,10 +268,10 @@ caml_startup__6:
 	.quad	3064
 	.globl	caml_exn_Not_found
 caml_exn_Not_found:
-	.quad	caml_startup__7
+	.quad	caml_startup.7
 	.quad	-13
 	.quad	3068
-caml_startup__7:
+caml_startup.7:
 	.ascii	"Not_found"
 	.space	6
 	.byte	6
@@ -260,10 +280,10 @@ caml_startup__7:
 	.quad	3064
 	.globl	caml_exn_Match_failure
 caml_exn_Match_failure:
-	.quad	caml_startup__8
+	.quad	caml_startup.8
 	.quad	-15
 	.quad	3068
-caml_startup__8:
+caml_startup.8:
 	.ascii	"Match_failure"
 	.space	2
 	.byte	2
@@ -272,10 +292,10 @@ caml_startup__8:
 	.quad	3064
 	.globl	caml_exn_Stack_overflow
 caml_exn_Stack_overflow:
-	.quad	caml_startup__9
+	.quad	caml_startup.9
 	.quad	-17
 	.quad	3068
-caml_startup__9:
+caml_startup.9:
 	.ascii	"Stack_overflow"
 	.space	1
 	.byte	1
@@ -284,10 +304,10 @@ caml_startup__9:
 	.quad	3064
 	.globl	caml_exn_Sys_blocked_io
 caml_exn_Sys_blocked_io:
-	.quad	caml_startup__10
+	.quad	caml_startup.10
 	.quad	-19
 	.quad	3068
-caml_startup__10:
+caml_startup.10:
 	.ascii	"Sys_blocked_io"
 	.space	1
 	.byte	1
@@ -296,10 +316,10 @@ caml_startup__10:
 	.quad	3064
 	.globl	caml_exn_Assert_failure
 caml_exn_Assert_failure:
-	.quad	caml_startup__11
+	.quad	caml_startup.11
 	.quad	-21
 	.quad	3068
-caml_startup__11:
+caml_startup.11:
 	.ascii	"Assert_failure"
 	.space	1
 	.byte	1
@@ -308,10 +328,10 @@ caml_startup__11:
 	.quad	3064
 	.globl	caml_exn_Undefined_recursive_module
 caml_exn_Undefined_recursive_module:
-	.quad	caml_startup__12
+	.quad	caml_startup.12
 	.quad	-23
 	.quad	5116
-caml_startup__12:
+caml_startup.12:
 	.ascii	"Undefined_recursive_module"
 	.space	5
 	.byte	5
@@ -319,93 +339,93 @@ caml_startup__12:
 	.align	8
 	.globl	caml_globals
 caml_globals:
-	.quad	camlFac__gc_roots
+	.quad	camlFac.gc_roots
 	.quad	0
 	.data
 	.align	8
 	.quad	10236
 	.globl	caml_globals_map
 caml_globals_map:
-	.ascii	"\204\225\246\276\0\0\0/\0\0\0\10\0\0\0\35\0\0\0\31\240\300#Fac\220\60]\374\363k\265\331\2\345V+\361\214\232R\223\215\220\60B'\34\355\63[^\10\245\363Bn8\314\355o\240\4\6@@"
+	.ascii	"\204\225\246\276\0\0\0/\0\0\0\10\0\0\0\35\0\0\0\31\240\300#Fac\220\60\42\255V\356+\204}\235W\207\231\213@\211\17\216\220\60\16\247\3\357\346O\223\5\343j\316\272\222N\251\200\240\4\6@@"
 	.space	4
 	.byte	4
 	.data
 	.align	8
 	.globl	caml_data_segments
 caml_data_segments:
-	.quad	caml_startup__data_begin
-	.quad	caml_startup__data_end
-	.quad	camlFac__data_begin
-	.quad	camlFac__data_end
+	.quad	caml_startup.data_begin
+	.quad	caml_startup.data_end
+	.quad	camlFac.data_begin
+	.quad	camlFac.data_end
 	.quad	0
 	.data
 	.align	8
 	.globl	caml_code_segments
 caml_code_segments:
-	.quad	caml_startup__code_begin
-	.quad	caml_startup__code_end
-	.quad	camlFac__code_begin
-	.quad	camlFac__code_end
+	.quad	caml_startup.code_begin
+	.quad	caml_startup.code_end
+	.quad	camlFac.code_begin
+	.quad	camlFac.code_end
 	.quad	0
 	.data
 	.align	8
 	.globl	caml_frametable
 caml_frametable:
-	.quad	caml_startup__frametable
-	.quad	caml_system__frametable
-	.quad	camlFac__frametable
+	.quad	caml_startup.frametable
+	.quad	caml_system.frametable
+	.quad	camlFac.frametable
 	.quad	0
 	.text
-	.globl	caml_startup__code_end
-caml_startup__code_end:
+	.globl	caml_startup.code_end
+caml_startup.code_end:
 	.data
 				/* relocation table start */
 	.align	8
 				/* relocation table end */
 	.data
 	.quad	0
-	.globl	caml_startup__data_end
-caml_startup__data_end:
+	.globl	caml_startup.data_end
+caml_startup.data_end:
 	.quad	0
 	.align	8
-	.globl	caml_startup__frametable
-caml_startup__frametable:
+	.globl	caml_startup.frametable
+caml_startup.frametable:
 	.quad	6
-	.quad	.L149
+	.quad	.L161
 	.word	16
 	.word	1
 	.word	0
 	.align	8
-	.quad	.L146
-	.word	32
+	.quad	.L156
+	.word	24
 	.word	1
 	.word	8
 	.align	8
-	.quad	.L145
-	.word	32
+	.quad	.L155
+	.word	24
 	.word	2
 	.word	0
 	.word	8
 	.align	8
-	.quad	.L142
-	.word	18
+	.quad	.L150
+	.word	10
 	.word	2
 	.word	3
 	.word	7
 	.byte	0
 	.align	8
-	.quad	.L137
-	.word	18
+	.quad	.L145
+	.word	10
 	.word	2
 	.word	1
 	.word	3
 	.byte	1
 	.byte	3
 	.align	8
-	.quad	.L134
-	.word	16
+	.quad	.L142
+	.word	8
 	.word	0
 	.align	8
 	.align	8
-	.size caml_startup__frametable,. - caml_startup__frametable
+	.size caml_startup.frametable,. - caml_startup.frametable
 	.section .note.GNU-stack,"",%progbits

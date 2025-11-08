@@ -1,8 +1,8 @@
-(include dune.dump)
+; (include dune.dump)
 
 (rule
- (deps fac_gas_startup.s)
- (targets fac_gas_startup.o)
+ (deps facacc_gas_startup.s)
+ (targets facacc_gas_startup.o)
  (mode
   (promote (until-clean)))
  (action
@@ -17,39 +17,77 @@
   (run as -o %{targets} %{deps})))
 
 (rule
- (deps fac_gas_startup.o facacc_gas.o)
+ (deps facacc_gas_startup.o facacc_gas.o)
  (targets facacc_gas.exe)
  (action
   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
 
 (cram
+ (applies_to 1)
  (deps facacc_gas.exe))
 
-;;;;;;;;;;;;;;;;;;;;;;
+; ;;;;;;;;;;;;;;;;;;;;;;
+
+; (rule
+;  (deps fac_nasm_startup.s)
+;  (targets fac_nasm_startup.o)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+; (rule
+;  (deps fac_nasm.s)
+;  (targets fac_nasm.o)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+; (rule
+;  (deps fac_nasm_startup.o fac_nasm.o)
+;  (targets facacc_nasm.exe)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+
+; (cram
+;  (deps facacc_nasm.exe))
+
+;;;;;;;;;;;;;;;;;;;;;; RV64
 
 (rule
- (deps fac_nasm_startup.s)
- (targets fac_nasm_startup.o)
+ (deps facacc_rv64_startup.s)
+ (targets facacc_rv64_startup.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
 
 (rule
- (deps fac_nasm.s)
- (targets fac_nasm.o)
+ (deps facacc_rv64.s)
+ (targets facacc_rv64.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
 
 (rule
- (deps fac_nasm_startup.o fac_nasm.o)
- (targets facacc_nasm.exe)
+ (deps facacc_rv64_startup.o facacc_rv64.o)
+ (targets facacc_rv64.exe)
  (mode
   (promote (until-clean)))
  (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+  (run
+   riscv64-linux-gnu-gcc
+   -o
+   %{targets}
+   -L%{read:../risc_ocaml_lib.txt}
+   %{deps}
+   -lasmrun
+   -lm)))
 
 (cram
- (deps facacc_nasm.exe))
+ (applies_to rv64)
+ (deps facacc_rv64.exe))

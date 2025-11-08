@@ -47,36 +47,76 @@
  (mode
   (promote (until-clean)))
  (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+  (run gcc -o %{targets} -L%{ocaml_where} %{deps} -lasmrun -lm)))
 
 (cram
+ (applies_to 1)
  (deps fac_gas.exe))
 
 ;;;;;;;;;;;;;;;;;;;;;;
 
-(rule
- (deps mini_nasm_startup.s)
- (targets mini_nasm_startup.o)
- (mode
-  (promote (until-clean)))
- (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+; (rule
+;  (deps mini_nasm_startup.s)
+;  (targets mini_nasm_startup.o)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+; (rule
+;  (deps mini_nasm.s)
+;  (targets mini_nasm.o)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+
+; (rule
+;  (deps mini_nasm_startup.o mini_nasm.o)
+;  (targets mini_nasm.exe)
+;  (mode
+;   (promote (until-clean)))
+;  (action
+;   (run gcc -o %{targets} -L%{ocaml_where} -lasmrun -lm %{deps})))
+
+; (cram
+;  (deps mini_nasm.exe))
+
+;;;;;;;;;;;;;;;;;;;;;; RV64
 
 (rule
- (deps mini_nasm.s)
- (targets mini_nasm.o)
+ (deps mini_rv64_startup.s)
+ (targets mini_rv64_startup.o)
  (mode
   (promote (until-clean)))
  (action
-  (run nasm -g -F dwarf -f elf64 -o %{targets} %{deps})))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
 
 (rule
- (deps mini_nasm_startup.o mini_nasm.o)
- (targets mini_nasm.exe)
+ (deps mini_rv64.s)
+ (targets mini_rv64.o)
  (mode
   (promote (until-clean)))
  (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
+
+(rule
+ (deps mini_rv64_startup.o mini_rv64.o)
+ (targets mini_rv64.exe)
+ (mode
+  (promote (until-clean)))
+ (action
+  (run
+   riscv64-linux-gnu-gcc
+   -o
+   %{targets}
+   -L%{read:../risc_ocaml_lib.txt}
+   %{deps}
+   -lasmrun
+   -lm
+   ;  --verbose
+   ;
+   )))
 
 (cram
- (deps mini_nasm.exe))
+ (deps mini_rv64.exe))

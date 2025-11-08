@@ -9,11 +9,11 @@ caml_absf_mask:
 	.quad	0x7fffffffffffffff
 	.quad	-1
 	.data
-	.globl	camlFac__data_begin
-camlFac__data_begin:
+	.globl	camlFac.data_begin
+camlFac.data_begin:
 	.text
-	.globl	camlFac__code_begin
-camlFac__code_begin:
+	.globl	camlFac.code_begin
+camlFac.code_begin:
 	.data
 	.align	8
 	.data
@@ -21,48 +21,48 @@ camlFac__code_begin:
 	.quad	3063
 	.globl	camlFac__string_of_int_84
 camlFac__string_of_int_84:
-	.globl	camlFac__string_of_int_21_closure
-camlFac__string_of_int_21_closure:
-	.quad	camlFac__string_of_int_21
+	.globl	camlFac.string_of_int_21_closure
+camlFac.string_of_int_21_closure:
+	.quad	camlFac.string_of_int_21
 	.quad	0x100000000000005
 	.data
 	.align	8
 	.quad	3063
 	.globl	camlFac__set_of_closures_86
 camlFac__set_of_closures_86:
-	.globl	camlFac__fac_58_closure
-camlFac__fac_58_closure:
-	.quad	camlFac__fac_58
+	.globl	camlFac.fac_58_closure
+camlFac.fac_58_closure:
+	.quad	camlFac.fac_58
 	.quad	0x100000000000005
 	.data
 	.align	8
 	.quad	3063
 	.globl	camlFac__print_endline_133
 camlFac__print_endline_133:
-	.globl	camlFac__print_endline_43_closure
-camlFac__print_endline_43_closure:
-	.quad	camlFac__print_endline_43
+	.globl	camlFac.print_endline_43_closure
+camlFac.print_endline_43_closure:
+	.quad	camlFac.print_endline_43
 	.quad	0x100000000000005
 	.data
 	.align	8
 	.quad	4087
 	.globl	camlFac__output_string_85
 camlFac__output_string_85:
-	.globl	camlFac__output_string_31_closure
-camlFac__output_string_31_closure:
+	.globl	camlFac.output_string_31_closure
+camlFac.output_string_31_closure:
 	.quad	caml_curry2
 	.quad	0x200000000000007
-	.quad	camlFac__output_string_31
+	.quad	camlFac.output_string_31
 	.data
 	.align	8
 	.quad	5888
 	.globl	camlFac
 camlFac:
 	.quad	1
-	.quad	camlFac__string_of_int_21_closure
-	.quad	camlFac__output_string_31_closure
-	.quad	camlFac__print_endline_43_closure
-	.quad	camlFac__fac_58_closure
+	.quad	camlFac.string_of_int_21_closure
+	.quad	camlFac.output_string_31_closure
+	.quad	camlFac.print_endline_43_closure
+	.quad	camlFac.fac_58_closure
 	.data
 	.align	8
 	.quad	1792
@@ -83,8 +83,8 @@ camlFac__Pccall_98:
 	.quad	1
 	.data
 	.align	8
-	.globl	camlFac__gc_roots
-camlFac__gc_roots:
+	.globl	camlFac.gc_roots
+camlFac.gc_roots:
 	.quad	camlFac__Pccall_98
 	.quad	camlFac__apply_arg_95
 	.quad	camlFac__apply_arg_94
@@ -92,28 +92,24 @@ camlFac__gc_roots:
 	.quad	0
 	.text
 	.align	16
-	.globl	camlFac__string_of_int_21
-camlFac__string_of_int_21:
-	subq	$8, %rsp
+	.globl	camlFac.string_of_int_21
+camlFac.string_of_int_21:
+	.cfi_startproc
 .L100:
 	movq	camlFac__const_immstring_25@GOTPCREL(%rip), %rdi
 	movq	%rax, %rsi
 	movq	caml_format_int@GOTPCREL(%rip), %rax
 	call	caml_c_call@PLT
 .L101:
-	movq	8(%r14), %r15
-	addq	$8, %rsp
 	ret
-
-	.type camlFac__string_of_int_21,@function
-	.size camlFac__string_of_int_21,. - camlFac__string_of_int_21
+	.cfi_endproc
+	.type camlFac.string_of_int_21,@function
+	.size camlFac.string_of_int_21,. - camlFac.string_of_int_21
 	.text
 	.align	16
-	.globl	camlFac__output_string_31
-camlFac__output_string_31:
+	.globl	camlFac.output_string_31
+camlFac.output_string_31:
 	.cfi_startproc
-	subq	$8, %rsp
-	.cfi_adjust_cfa_offset 8
 .L102:
 	movq	-8(%rbx), %rdi
 	shrq	$10, %rdi
@@ -127,57 +123,72 @@ camlFac__output_string_31:
 	movq	caml_ml_output@GOTPCREL(%rip), %rax
 	call	caml_c_call@PLT
 .L103:
-	movq	8(%r14), %r15
-	addq	$8, %rsp
-	.cfi_adjust_cfa_offset -8
 	ret
-	.cfi_adjust_cfa_offset 8
-	.cfi_adjust_cfa_offset -8
 	.cfi_endproc
-	.type camlFac__output_string_31,@function
-	.size camlFac__output_string_31,. - camlFac__output_string_31
+	.type camlFac.output_string_31,@function
+	.size camlFac.output_string_31,. - camlFac.output_string_31
 	.text
 	.align	16
-	.globl	camlFac__print_endline_43
-camlFac__print_endline_43:
-	subq	$8, %rsp
+	.globl	camlFac.print_endline_43
+camlFac.print_endline_43:
+	.cfi_startproc
+	leaq	-320(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L105
+.L106:
+.L104:
 	movq	%rax, %rbx
 	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rax
 	movq	(%rax), %rax
-	call	camlFac__output_string_31@PLT
+	call	camlFac.output_string_31@PLT
+.L107:
 	movl	$21, %esi
 	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rax
 	movq	(%rax), %rdi
 	movq	caml_ml_output_char@GOTPCREL(%rip), %rax
 	call	caml_c_call@PLT
-	movq	8(%r14), %r15
+.L108:
 	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rax
 	movq	(%rax), %rdi
 	movq	caml_ml_flush@GOTPCREL(%rip), %rax
 	call	caml_c_call@PLT
-	movq	8(%r14), %r15
-	addq	$8, %rsp
+.L109:
 	ret
-	.type camlFac__print_endline_43,@function
-	.size camlFac__print_endline_43,. - camlFac__print_endline_43
-
+.L105:
+	push	$33
+	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
+	.cfi_adjust_cfa_offset -8
+	jmp	.L106
+	.cfi_endproc
+	.type camlFac.print_endline_43,@function
+	.size camlFac.print_endline_43,. - camlFac.print_endline_43
 	.text
 	.align	16
-	.globl	camlFac__fac_58
-camlFac__fac_58:
+	.globl	camlFac.fac_58
+camlFac.fac_58:
+	.cfi_startproc
+	leaq	-328(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L112
+.L113:
 	subq	$8, %rsp
-.L109:
+	.cfi_adjust_cfa_offset 8
+.L111:
 	cmpq	$5, %rax
-	jge	.L108
+	jge	.L110
 	movl	$3, %eax
 	addq	$8, %rsp
+	.cfi_adjust_cfa_offset -8
 	ret
+	.cfi_adjust_cfa_offset 8
 	.align	4
-.L108:
+.L110:
 	movq	%rax, (%rsp)
 	addq	$-2, %rax
-	call	camlFac__fac_58@PLT
-.L110:
+	call	camlFac.fac_58@PLT
+.L114:
 	movq	%rax, %rbx
 	sarq	$1, %rbx
 	movq	(%rsp), %rax
@@ -185,10 +196,28 @@ camlFac__fac_58:
 	imulq	%rbx, %rax
 	incq	%rax
 	addq	$8, %rsp
+	.cfi_adjust_cfa_offset -8
 	ret
-	.type camlFac__fac_58,@function
-	.size camlFac__fac_58,. - camlFac__fac_58
-
+	.cfi_adjust_cfa_offset 8
+.L112:
+	push	$34
+	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
+	.cfi_adjust_cfa_offset -8
+	jmp	.L113
+	.cfi_adjust_cfa_offset -8
+	.cfi_endproc
+	.type camlFac.fac_58,@function
+	.size camlFac.fac_58,. - camlFac.fac_58
+	.data
+	.align	8
+	.data
+	.align	8
+	.data
+	.align	8
+	.data
+	.align	8
 	.data
 	.align	8
 	.quad	2044
@@ -197,41 +226,80 @@ camlFac__const_immstring_25:
 	.ascii	"%d"
 	.space	5
 	.byte	5
-
 	.text
 	.align	16
-	.globl	camlFac__entry
-camlFac__entry:
-	subq	$8, %rsp
+	.globl	camlFac.entry
+camlFac.entry:
+	.cfi_startproc
+	leaq	-320(%rsp), %r10
+	cmpq	40(%r14), %r10
+	jb	.L116
+.L117:
+.L115:
 	movl	$3, %edi
 	movq	caml_ml_open_descriptor_out@GOTPCREL(%rip), %rax
 	call	caml_c_call@PLT
-	movq	8(%r14), %r15
-	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rbx
-	movq	%rax, (%rbx)
+.L118:
+	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rdi
+	movq	%rax, %rsi
+	movq	%rsp, %rbx
+	.cfi_remember_state
+	.cfi_def_cfa_register %rbx
+	movq	64(%r14), %rsp
+	call	caml_initialize@PLT
+	movq	%rbx, %rsp
+	.cfi_restore_state
 	movl	$11, %eax
-	call	camlFac__fac_58@PLT
-	movq	camlFac__apply_arg_95@GOTPCREL(%rip), %rbx
-	movq	%rax, (%rbx)
+	call	camlFac.fac_58@PLT
+.L119:
+	movq	camlFac__apply_arg_95@GOTPCREL(%rip), %rdi
+	movq	%rax, %rsi
+	movq	%rsp, %rbx
+	.cfi_remember_state
+	.cfi_def_cfa_register %rbx
+	movq	64(%r14), %rsp
+	call	caml_initialize@PLT
+	movq	%rbx, %rsp
+	.cfi_restore_state
 	movq	camlFac__apply_arg_95@GOTPCREL(%rip), %rax
 	movq	(%rax), %rax
-
-	call	camlFac__string_of_int_21@PLT
-	movq	camlFac__apply_arg_94@GOTPCREL(%rip), %rbx
-	movq	%rax, (%rbx)
+	call	camlFac.string_of_int_21@PLT
+.L120:
+	movq	camlFac__apply_arg_94@GOTPCREL(%rip), %rdi
+	movq	%rax, %rsi
+	movq	%rsp, %rbx
+	.cfi_remember_state
+	.cfi_def_cfa_register %rbx
+	movq	64(%r14), %rsp
+	call	caml_initialize@PLT
+	movq	%rbx, %rsp
+	.cfi_restore_state
 	movq	camlFac__apply_arg_94@GOTPCREL(%rip), %rax
 	movq	(%rax), %rax
-	call	camlFac__print_endline_43@PLT
-	movq	camlFac@GOTPCREL(%rip), %rax
-	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rbx
-	movq	(%rbx), %rbx
-	movq	%rbx, (%rax)
+	call	camlFac.print_endline_43@PLT
+.L121:
+	movq	camlFac__Pccall_98@GOTPCREL(%rip), %rax
+	movq	(%rax), %rsi
+	movq	camlFac@GOTPCREL(%rip), %rdi
+	movq	%rsp, %rbx
+	.cfi_remember_state
+	.cfi_def_cfa_register %rbx
+	movq	64(%r14), %rsp
+	call	caml_initialize@PLT
+	movq	%rbx, %rsp
+	.cfi_restore_state
 	movl	$1, %eax
-	addq	$8, %rsp
 	ret
-	.type camlFac__entry,@function
-	.size camlFac__entry,. - camlFac__entry
-
+.L116:
+	push	$33
+	.cfi_adjust_cfa_offset 8
+	call	caml_call_realloc_stack@PLT
+	popq	%r10
+	.cfi_adjust_cfa_offset -8
+	jmp	.L117
+	.cfi_endproc
+	.type camlFac.entry,@function
+	.size camlFac.entry,. - camlFac.entry
 	.data
 	.align	8
 	.quad	caml_ml_output
@@ -240,148 +308,148 @@ camlFac__entry:
 	.quad	caml_ml_flush
 	.quad	caml_ml_open_descriptor_out
 	.text
-	.globl	camlFac__code_end
-camlFac__code_end:
+	.globl	camlFac.code_end
+camlFac.code_end:
 	.data
 				/* relocation table start */
 	.align	8
 				/* relocation table end */
 	.data
 	.quad	0
-	.globl	camlFac__data_end
-camlFac__data_end:
+	.globl	camlFac.data_end
+camlFac.data_end:
 	.quad	0
 	.align	8
-	.globl	camlFac__frametable
-camlFac__frametable:
-# 	.quad	10
-# 	.quad	.L115
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L116 - .) + 0
-# 	.align	8
-# 	.quad	.L114
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L117 - .) + 0
-# 	.align	8
-# 	.quad	.L113
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L118 - .) + 0
-# 	.align	8
-# 	.quad	.L112
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L119 - .) + 0
-# 	.align	8
-# 	.quad	.L110
-# 	.word	17
-# 	.word	1
-# 	.word	0
-# 	.align	4
-# 	.long	(.L120 - .) + 0
-# 	.align	8
-# 	.quad	.L107
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L121 - .) + 0
-# 	.align	8
-# 	.quad	.L106
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L122 - .) + 0
-# 	.align	8
-# 	.quad	.L105
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L123 - .) + 0
-# 	.align	8
-# 	.quad	.L103
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L124 - .) + 0
-# 	.align	8
-# 	.quad	.L101
-# 	.word	17
-# 	.word	0
-# 	.align	4
-# 	.long	(.L125 - .) + 0
-# 	.align	8
-# 	.align	4
-# .L123:
-# 	.long	(.L127 - .) + 1610612736
-# 	.long	73760
-# 	.align	4
-# .L118:
-# 	.long	(.L128 - .) + -1275068416
-# 	.long	107104
-# 	.align	4
-# .L119:
-# 	.long	(.L129 - .) + -2013265920
-# 	.long	16592
-# 	.align	4
-# .L124:
-# 	.long	(.L130 - .) + -1140850688
-# 	.long	61472
-# 	.align	4
-# .L116:
-# 	.long	(.L128 - .) + -1207959552
-# 	.long	106640
-# 	.align	4
-# .L122:
-# 	.long	(.L127 - .) + -1006632960
-# 	.long	74144
-# 	.align	4
-# .L121:
-# 	.long	(.L127 - .) + -67108864
-# 	.long	74544
-# 	.align	4
-# .L120:
-# 	.long	(.L131 - .) + -1073741824
-# 	.long	98928
-# 	.align	4
-# .L117:
-# 	.long	(.L128 - .) + -1207959552
-# 	.long	106864
-# 	.align	4
-# .L125:
-# 	.long	(.L132 - .) + -1677721600
-# 	.long	33120
-# .L126:
-# 	.ascii	"fac.ml\0"
-# 	.align	4
-# .L127:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac.print_endline\0"
-# 	.align	4
-# .L128:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac\0"
-# 	.align	4
-# .L129:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac.stdout\0"
-# 	.align	4
-# .L131:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac.fac\0"
-# 	.align	4
-# .L132:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac.string_of_int\0"
-# 	.align	4
-# .L130:
-# 	.long	(.L126 - .) + 0
-# 	.ascii	"Fac.output_string\0"
+	.globl	camlFac.frametable
+camlFac.frametable:
+	.quad	10
+	.quad	.L121
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L122 - .) + 0
 	.align	8
-	.size camlFac__frametable,. - camlFac__frametable
+	.quad	.L120
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L123 - .) + 0
+	.align	8
+	.quad	.L119
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L124 - .) + 0
+	.align	8
+	.quad	.L118
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L125 - .) + 0
+	.align	8
+	.quad	.L114
+	.word	17
+	.word	1
+	.word	0
+	.align	4
+	.long	(.L126 - .) + 0
+	.align	8
+	.quad	.L109
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L127 - .) + 0
+	.align	8
+	.quad	.L108
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L128 - .) + 0
+	.align	8
+	.quad	.L107
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L129 - .) + 0
+	.align	8
+	.quad	.L103
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L130 - .) + 0
+	.align	8
+	.quad	.L101
+	.word	9
+	.word	0
+	.align	4
+	.long	(.L131 - .) + 0
+	.align	8
+	.align	4
+.L129:
+	.long	(.L133 - .) + 0
+	.long	9439424
+	.align	4
+.L124:
+	.long	(.L134 - .) + 0
+	.long	13670760
+	.align	4
+.L125:
+	.long	(.L135 - .) + 0
+	.long	2110736
+	.align	4
+.L130:
+	.long	(.L136 - .) + 0
+	.long	7866744
+	.align	4
+.L122:
+	.long	(.L134 - .) + 0
+	.long	13641072
+	.align	4
+.L128:
+	.long	(.L133 - .) + 0
+	.long	9464200
+	.align	4
+.L127:
+	.long	(.L133 - .) + 0
+	.long	9489912
+	.align	4
+.L126:
+	.long	(.L137 - .) + 0
+	.long	12623232
+	.align	4
+.L123:
+	.long	(.L134 - .) + 0
+	.long	13655408
+	.align	4
+.L131:
+	.long	(.L138 - .) + 0
+	.long	4217144
+.L132:
+	.ascii	"fac.ml\0"
+	.align	4
+.L135:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac.stdout\0"
+	.align	4
+.L138:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac.string_of_int\0"
+	.align	4
+.L137:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac.fac\0"
+	.align	4
+.L133:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac.print_endline\0"
+	.align	4
+.L136:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac.output_string\0"
+	.align	4
+.L134:
+	.long	(.L132 - .) + 0
+	.ascii	"Fac\0"
+	.align	8
+	.size camlFac.frametable,. - camlFac.frametable
 	.section .note.GNU-stack,"",%progbits

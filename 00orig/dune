@@ -16,9 +16,9 @@
    -verbose
    -o
    mini.exe
-   -ccopt
+   -cclib
    -lasmrun
-   -ccopt
+   -cclib
    -lm)))
 
 (rule
@@ -36,9 +36,9 @@
    -verbose
    -o
    fac.exe
-   -ccopt
+   -cclib
    -lasmrun
-   -ccopt
+   -cclib
    -lm)))
 
 (rule
@@ -56,9 +56,9 @@
    -verbose
    -o
    fack.exe
-   -ccopt
+   -cclib
    -lasmrun
-   -ccopt
+   -cclib
    -lm)))
 
 (cram
@@ -79,7 +79,7 @@
    -verbose
    -o
    fac_acc.exe
-   -ccopt
+   -cclib
    -lasmrun
-   -ccopt
+   -cclib
    -lm)))

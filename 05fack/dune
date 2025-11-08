@@ -1,51 +1,36 @@
+;;;;;;;;;;;;;;;;;;;;;; RV64
+
 (rule
- (deps MAIN_gas_startup.s)
- (targets MAIN_gas_startup.o)
+ (deps fack_rv64_startup.s)
+ (targets fack_rv64_startup.o)
  (mode
   (promote (until-clean)))
  (action
-  (run as -o %{targets} %{deps})))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
 
 (rule
- (deps MAIN_gas.s)
- (targets MAIN_gas.o)
+ (deps fack_rv64.s)
+ (targets fack_rv64.o)
  (mode
   (promote (until-clean)))
  (action
-  (run as -o %{targets} %{deps})))
+  (run riscv64-linux-gnu-as -g -o %{targets} %{deps})))
 
 (rule
- (deps MAIN_gas_startup.o MAIN_gas.o)
- (targets MAIN_gas.exe)
+ (deps fack_rv64_startup.o fack_rv64.o)
+ (targets fack_rv64.exe)
+ (mode
+  (promote (until-clean)))
  (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+  (run
+   riscv64-linux-gnu-gcc
+   -o
+   %{targets}
+   -L%{read:../risc_ocaml_lib.txt}
+   %{deps}
+   -lasmrun
+   -lm)))
 
 (cram
- (deps MAIN_gas.exe))
-
-;;;;
-
-(rule
- (deps MAIN_nasm_startup.s)
- (targets MAIN_nasm_startup.o)
- (mode
-  (promote (until-clean)))
- (action
-  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
-
-(rule
- (deps MAIN_nasm.s)
- (targets MAIN_nasm.o)
- (mode
-  (promote (until-clean)))
- (action
-  (run yasm -g dwarf2 -f elf64 -o %{targets} %{deps})))
-
-(rule
- (deps MAIN_nasm_startup.o MAIN_nasm.o)
- (targets MAIN_nasm.exe)
- (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
-
-(cram
- (deps MAIN_nasm.exe))
+ (applies_to rv64)
+ (deps fack_rv64.exe))
