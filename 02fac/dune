@@ -20,7 +20,7 @@
  (deps fac_gas_startup.o fac_gas.o)
  (targets fac_gas.exe)
  (action
-  (run gcc -o %{targets} %{deps} -L%{ocaml_where} -lasmrun -lm)))
+  (run gcc -o %{targets} -L%{ocaml_where} %{deps} -lasmrun -lm)))
 
 (cram
  (applies_to 1)

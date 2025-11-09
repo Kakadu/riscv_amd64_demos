@@ -21,22 +21,22 @@ caml_program:
 	.cfi_startproc
 	leaq	-320(%rsp), %r10
 	cmpq	40(%r14), %r10
-	jb	.L140
-.L141:
-.L139:
+	jb	.L139
+.L140:
+.L138:
 	call	camlFac.entry@PLT
-.L142:
+.L141:
 	movq	caml_globals_inited@GOTPCREL(%rip), %rax
 	addq	$1, (%rax)
 	movl	$1, %eax
 	ret
-.L140:
+.L139:
 	push	$33
 	.cfi_adjust_cfa_offset 8
 	call	caml_call_realloc_stack@PLT
 	popq	%r10
 	.cfi_adjust_cfa_offset -8
-	jmp	.L141
+	jmp	.L140
 	.cfi_endproc
 	.type caml_program,@function
 	.size caml_program,. - caml_program
@@ -50,11 +50,11 @@ caml_startup.gc_roots:
 	.globl	caml_curry2
 caml_curry2:
 	.cfi_startproc
-.L143:
+.L142:
 	subq	$40, %r15
 	cmpq	(%r14), %r15
-	jb	.L144
-.L146:
+	jb	.L143
+.L145:
 	leaq	8(%r15), %rdi
 	movq	$4343, -8(%rdi)
 	movq	caml_curry2_1@GOTPCREL(%rip), %rsi
@@ -65,10 +65,10 @@ caml_curry2:
 	movq	%rbx, 24(%rdi)
 	movq	%rdi, %rax
 	ret
-.L144:
+.L143:
 	call	caml_call_gc@PLT
-.L145:
-	jmp	.L146
+.L144:
+	jmp	.L145
 	.cfi_endproc
 	.type caml_curry2,@function
 	.size caml_curry2,. - caml_curry2
@@ -77,20 +77,20 @@ caml_curry2:
 	.globl	caml_curry2_1
 caml_curry2_1:
 	.cfi_startproc
-.L147:
+.L146:
 	movq	%rax, %rsi
 	cmpq	(%r14), %r15
-	jbe	.L148
-.L149:
+	jbe	.L147
+.L148:
 	movq	24(%rbx), %rdi
 	movq	16(%rbx), %rax
 	movq	16(%rdi), %rdx
 	movq	%rsi, %rbx
 	jmp	*%rdx
-.L148:
+.L147:
 	call	caml_call_gc@PLT
-.L150:
-	jmp	.L149
+.L149:
+	jmp	.L148
 	.cfi_endproc
 	.type caml_curry2_1,@function
 	.size caml_curry2_1,. - caml_curry2_1
@@ -101,33 +101,33 @@ caml_apply3:
 	.cfi_startproc
 	leaq	-336(%rsp), %r10
 	cmpq	40(%r14), %r10
-	jb	.L153
-.L154:
+	jb	.L152
+.L153:
 	subq	$16, %rsp
 	.cfi_adjust_cfa_offset 16
-.L152:
+.L151:
 	movq	8(%rsi), %rdx
 	sarq	$56, %rdx
 	cmpq	$3, %rdx
-	jne	.L151
+	jne	.L150
 	movq	16(%rsi), %rdx
 	addq	$16, %rsp
 	.cfi_adjust_cfa_offset -16
 	jmp	*%rdx
 	.cfi_adjust_cfa_offset 16
 	.align	4
-.L151:
+.L150:
 	movq	%rdi, 8(%rsp)
 	movq	%rbx, (%rsp)
 	movq	(%rsi), %rdi
 	movq	%rsi, %rbx
 	call	*%rdi
-.L155:
+.L154:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	(%rsp), %rax
 	call	*%rdi
-.L156:
+.L155:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	8(%rsp), %rax
@@ -135,13 +135,13 @@ caml_apply3:
 	.cfi_adjust_cfa_offset -16
 	jmp	*%rdi
 	.cfi_adjust_cfa_offset 16
-.L153:
+.L152:
 	push	$35
 	.cfi_adjust_cfa_offset 8
 	call	caml_call_realloc_stack@PLT
 	popq	%r10
 	.cfi_adjust_cfa_offset -8
-	jmp	.L154
+	jmp	.L153
 	.cfi_adjust_cfa_offset -16
 	.cfi_endproc
 	.type caml_apply3,@function
@@ -153,27 +153,27 @@ caml_apply2:
 	.cfi_startproc
 	leaq	-328(%rsp), %r10
 	cmpq	40(%r14), %r10
-	jb	.L159
-.L160:
+	jb	.L158
+.L159:
 	subq	$8, %rsp
 	.cfi_adjust_cfa_offset 8
-.L158:
+.L157:
 	movq	8(%rdi), %rsi
 	sarq	$56, %rsi
 	cmpq	$2, %rsi
-	jne	.L157
+	jne	.L156
 	movq	16(%rdi), %rsi
 	addq	$8, %rsp
 	.cfi_adjust_cfa_offset -8
 	jmp	*%rsi
 	.cfi_adjust_cfa_offset 8
 	.align	4
-.L157:
+.L156:
 	movq	%rbx, (%rsp)
 	movq	(%rdi), %rsi
 	movq	%rdi, %rbx
 	call	*%rsi
-.L161:
+.L160:
 	movq	%rax, %rbx
 	movq	(%rbx), %rdi
 	movq	(%rsp), %rax
@@ -181,13 +181,13 @@ caml_apply2:
 	.cfi_adjust_cfa_offset -8
 	jmp	*%rdi
 	.cfi_adjust_cfa_offset 8
-.L159:
+.L158:
 	push	$34
 	.cfi_adjust_cfa_offset 8
 	call	caml_call_realloc_stack@PLT
 	popq	%r10
 	.cfi_adjust_cfa_offset -8
-	jmp	.L160
+	jmp	.L159
 	.cfi_adjust_cfa_offset -8
 	.cfi_endproc
 	.type caml_apply2,@function
@@ -346,7 +346,7 @@ caml_globals:
 	.quad	10236
 	.globl	caml_globals_map
 caml_globals_map:
-	.ascii	"\204\225\246\276\0\0\0/\0\0\0\10\0\0\0\35\0\0\0\31\240\300#Fac\220\60\42\255V\356+\204}\235W\207\231\213@\211\17\216\220\60\16\247\3\357\346O\223\5\343j\316\272\222N\251\200\240\4\6@@"
+	.ascii	"\204\225\246\276\0\0\0/\0\0\0\10\0\0\0\35\0\0\0\31\240\300#Fac\220\60\313V\271\26\33$\217'\277\355\272A>\316`;\220\60\272\276\367\334\334~X\346D\254.\215v)U\364\240\4\6@@"
 	.space	4
 	.byte	4
 	.data
@@ -391,30 +391,30 @@ caml_startup.data_end:
 	.globl	caml_startup.frametable
 caml_startup.frametable:
 	.quad	6
-	.quad	.L161
+	.quad	.L160
 	.word	16
 	.word	1
 	.word	0
 	.align	8
-	.quad	.L156
+	.quad	.L155
 	.word	24
 	.word	1
 	.word	8
 	.align	8
-	.quad	.L155
+	.quad	.L154
 	.word	24
 	.word	2
 	.word	0
 	.word	8
 	.align	8
-	.quad	.L150
+	.quad	.L149
 	.word	10
 	.word	2
 	.word	3
 	.word	7
 	.byte	0
 	.align	8
-	.quad	.L145
+	.quad	.L144
 	.word	10
 	.word	2
 	.word	1
@@ -422,7 +422,7 @@ caml_startup.frametable:
 	.byte	1
 	.byte	3
 	.align	8
-	.quad	.L142
+	.quad	.L141
 	.word	8
 	.word	0
 	.align	8
